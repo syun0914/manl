@@ -16,19 +16,19 @@ def lambda_handler(event,context):
     def info(day):
         day=day.strftime('%Y%m%d')
         s=''
-        if area=='국내':
+        if area=='충남':
             s='Sido'
         with u.urlopen(f'http://openapi.data.go.kr/openapi/service/rest/Covid19/getCovid19{s}InfStateJson?serviceKey=서비스키&pageNo=1&numOfRows=10&startCreateDt={day}&endCreateDt={day}') as url:
             temp=json.loads(json.dumps(x(url.read().decode())))['response']['body']['items']['item']
-        if area=='지역':
-            return temp[번호]
+        if area=='충남':
+            return temp[6]
         return temp
     
     try:
         data=info(dt)
         bdata=info(dt-td(1))
         today=dt.strftime('%Y%m%d일(오늘)')
-        
+    
     except:
         data=info(dt-td(1))
         bdata=info(dt-td(2))
@@ -56,7 +56,7 @@ def lambda_handler(event,context):
         사망 환자: {am('death')}
         음성 결과: {am('resutlNeg')}'''.replace(' '*4,'')
     
-    if area=='지역':
+    if area=='충남':
         result['data']['n']=f'''누적 확진자: {am('def')}
         격리 중: {am('isolIng')}
         격리 해제: {am('isolClear')}
