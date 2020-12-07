@@ -5,18 +5,18 @@
 import json,re,urllib.request
 
 def lambda_handler(event,context):
+    
     req_body=json.loads(event['body'])
     params=req_body['action']['params']
     date=str(json.loads(params['date'])['date']).replace('-','')
     mealtime=params['mealtime'].replace('중식','2').replace('석식','3')
     
-    with urllib.request.urlopen(f'https://open.neis.go.kr/hub/mealServiceDietInfo?ATPT_OFCDC_SC_CODE=시도교육청코드&SD_SCHUL_CODE=학교코드&KEY=키&TYPE=JSON&MMEAL_SC_CODE={mealtime}&MLSV_YMD={date}') as url:
+    with urllib.request.urlopen(f'https://open.neis.go.kr/hub/mealServiceDietInfo?ATPT_OFCDC_SC_CODE=N10&SD_SCHUL_CODE=8140209&KEY=키&TYPE=JSON&MMEAL_SC_CODE={mealtime}&MLSV_YMD={date}') as url:
         try:
             data=re.sub('[0-9.]','',json.loads(url.read())['mealServiceDietInfo'][1]['row'][0]['DDISH_NM'].replace('<br/>','\n'))
         
         except:
             data='급식이 없어요!'
-    
     result={
         'version':'2.0',
         'data':{
