@@ -1,4 +1,4 @@
-![logo](./images/manl.jpg){: width="100" height="100"}
+![logo](./images/manl.jpg)
 
 # 마늘
 학생들의 챗봇, 마늘
