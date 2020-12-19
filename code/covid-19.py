@@ -2,65 +2,64 @@
 # 보안을 위해 일부 정보가 삭제되었습니다.
 # Syun 제작
 
-import json,xmltodict,datetime,pytz,urllib.request as u
+import json,xmltodict,datetime as d,pytz,urllib.request as u
 
 x=xmltodict.parse
-d=datetime
-p=pytz.timezone
-dt=d.datetime.now(p('Asia/Seoul'))
-td=d.timedelta
+dt=lambda n: d.datetime.now(pytz.timezone('Asia/Seoul'))-d.timedelta(n)
 
 def lambda_handler(event,context):
-    area=json.loads(event['body'])['action']['params']['covidarea']
+    a=json.loads(event['body'])['action']['params']['covidarea']
     
-    def info(day):
-        day=day.strftime('%Y%m%d')
-        s=''
-        if area=='충남':
-            s='Sido'
-        with u.urlopen(f'http://openapi.data.go.kr/openapi/service/rest/Covid19/getCovid19{s}InfStateJson?serviceKey=서비스키&pageNo=1&numOfRows=10&startCreateDt={day}&endCreateDt={day}') as url:
+    if a=='충남':
+        area='Sido'
+    else:
+        area=''
+    
+    def info(n):
+        day=dt(n).strftime('%Y%m%d')
+        
+        with u.urlopen('주소') as url:
             temp=json.loads(json.dumps(x(url.read().decode())))['response']['body']['items']['item']
-        if area=='충남':
+        
+        if area=='':
+            return temp
+        else:
             return temp[6]
-        return temp
     
     try:
-        data=info(dt)
-        bdata=info(dt-td(1))
-        today=dt.strftime('%Y%m%d일(오늘)')
+        data=info(0)
+        bdata=info(1)
+        d='오늘'
     
     except:
-        data=info(dt-td(1))
-        bdata=info(dt-td(2))
-        today=(dt-td(1)).strftime('%Y%m%d일(어제)')
+        data=info(1)
+        bdata=info(2)
+        d='어제'
     
-    def am(key):
-        key+='Cnt'
-        data2=data[key]
-        bdata2=bdata[key]
-        return f'{int(data2):,d}명({int(data2)-int(bdata2):+,d}명)'
+    def am(k):
+        k+='Cnt'
+        return f'{int(data[k]):,d}명({int(data[k])-int(bdata[k]):+,d}명)'
     
     result={
         'version':'2.0',
         'data':{
-            'd':f'{today[0:4]}년 {today[4:6]}월 {today[6:]}',
-            'area':area
+            'd':f'(알약)  {d}의 코로나 19 현황({a})'
         }
     }
     
-    if area=='국내':
+    if area=='':
         result['data']['n']=f'''누적 확진자: {am('decide')}
-        치료 중: {am('care')}
-        검사 중: {am('exam')}
-        격리 해제: {am('clear')}
-        사망 환자: {am('death')}
-        음성 결과: {am('resutlNeg')}'''.replace(' '*4,'')
+치료 중: {am('care')}
+검사 중: {am('exam')}
+격리 해제: {am('clear')}
+음성 결과: {am('resutlNeg')}
+사망 환자: {am('death')}'''
     
-    if area=='충남':
+    else:
         result['data']['n']=f'''누적 확진자: {am('def')}
-        격리 중: {am('isolIng')}
-        격리 해제: {am('isolClear')}
-        사망 환자: {am('death')}'''.replace(' '*4,'')
+격리 중: {am('isolIng')}
+격리 해제: {am('isolClear')}
+사망 환자: {am('death')}'''
     
     return {
         'statusCode':200,
