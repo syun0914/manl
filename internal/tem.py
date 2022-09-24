@@ -1,6 +1,5 @@
+from dataclasses import asdict, dataclass, field
 from sys import _getframe
-from typing import Optional, Union
-from dataclasses import field, asdict, dataclass
 
 
 @dataclass
@@ -24,7 +23,7 @@ class Button:
     pass
 
 
-def del_empty(object: Union[dict, list]) -> Union[dict, list]:
+def del_empty(object: dict | list) -> dict | list:
     t = type(object)
     if t == dict:
         return {k: v for k, v in object.items() if v}
@@ -42,7 +41,7 @@ def t_filter(td: dict) -> dict:
     return td
 
 
-def data(**x):
+def data(**x) -> dict:
     '''
     주어진 인자들을 data 챗봇 템플릿으로 변환합니다.
     '''
@@ -51,10 +50,10 @@ def data(**x):
 
 def simpleImage(
     url: str,
-    altText: Optional[str]=None,
-    qReplies: Optional[list[QReply]]=None,
-    buttons: Optional[list[Button]]=None
-):
+    altText: str | None = None,
+    qReplies: list[QReply] | None = None,
+    buttons: list[Button] | None = None
+) -> dict:
     '''
     주어진 인자들을 simpleImage 챗봇 템플릿으로 변환합니다.
     (조건) qReplies는 qReply, buttons는 button 클래스를 통해 입력해야 합니다.
@@ -78,10 +77,10 @@ def simpleImage(
 
 def simpleText(
     text: str,
-    qReplies: Optional[list[QReply]]=None,
-    buttons: Optional[list[Button]]=None,
-    fw: bool=False
-):
+    qReplies: list[QReply] | None = None,
+    buttons: list[Button] | None = None,
+    fw: bool = False
+) -> dict:
     '''
     주어진 인자들을 simpleText 챗봇 템플릿으로 변환합니다.
     (조건) qReplies는 qReply, buttons는 button 클래스를 통해 입력해야 합니다.
@@ -105,10 +104,10 @@ def simpleText(
 def listCard(
     title: str,
     kLists: list[KList],
-    qReplies: Optional[list[QReply]]=None,
-    buttons: Optional[list[Button]]=None,
-    fw: bool=False
-):
+    qReplies: list[QReply] | None = None,
+    buttons: list[Button] | None = None,
+    fw: bool = False
+) -> dict:
     '''
     주어진 인자들을 listCard 챗봇 템플릿으로 변환합니다.
     (조건) qReplies는 qReply, buttons는 button 클래스를 통해 입력해야 합니다.
@@ -131,8 +130,8 @@ def listCard(
 
 
 def carousel(
-    kType: str, templates: list, qReplies: Optional[list[QReply]]=None
-):
+    kType: str, templates: list, qReplies: list[QReply] | None = None
+) -> dict:
     '''
     주어진 인자들을 carousel 챗봇 템플릿으로 변환합니다.
     (조건) templates는 이 모듈의 다른 함수들을,

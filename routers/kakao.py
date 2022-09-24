@@ -19,7 +19,9 @@ router = APIRouter()
 @router.post('/skill')
 async def skill(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
     '''
-    마늘 Always의 백엔드 API입니다.
+    일반 백엔드 API
+    -----
+    마늘의 일반 백엔드 API입니다.
     '''
     user_req = k_req['userRequest']
     bot = k_req['bot']
@@ -88,7 +90,9 @@ async def skill(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
 @router.post('/admin')
 async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
     '''
-    마늘 Always의 관리자 백엔드 API입니다.
+    관리자 백엔드 API
+    -----
+    마늘의 관리자 백엔드 API입니다.
     '''
     user_req = k_req['userRequest']
     bot = k_req['bot']
@@ -222,6 +226,8 @@ async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
 @router.post('/etc')
 async def etc(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
     '''
+    기타 백엔드 API
+    -----
     마늘의 기타 백엔드 API입니다.
     '''
     user_req = k_req['userRequest']
@@ -243,7 +249,9 @@ async def etc(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
 @router.post('/game')
 async def game(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
     '''
-    마늘 Always의 게임 백엔드 API입니다.
+    게임 백엔드 API
+    -----
+    마늘의 게임 백엔드 API입니다.
     '''
     user_req = k_req['userRequest']
     bot = k_req['bot']
@@ -298,7 +306,7 @@ async def game(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             )
             userdata = cur.fetchall()[0]
         except:
-            return tem.simpleText('\n\n'.join((TITLE, '알 수 없는 오류가 발생했어요.')))
+            return tem.simpleText('\n\n'.join((TITLE, '알 수 없는 오류가 발생했어요.')), [RETRY])
 
         if '종료' in input_:
             try:
@@ -306,7 +314,7 @@ async def game(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
                     'DELETE FROM num_baseball WHERE user_key=?', (user_key,)
                 )
             except:
-                return tem.simpleText('\n\n'.join((TITLE, '게임을 종료하지 못했어요.')))
+                return tem.simpleText('\n\n'.join((TITLE, '게임을 종료하지 못했어요.')), [RETRY])
             else:
                 con.commit()
                 res = [('정답', userdata[1]), ('횟수', str(userdata[2]))]
@@ -314,7 +322,7 @@ async def game(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
                 TITLE, [tem.KList(*t) for t in res], [RETRY]
             )
         elif len(set(input_)) != 4 or not input_.isdigit():
-            return tem.simpleText('\n\n'.join((TITLE, '올바르지 않은 입력값이에요.')))
+            return tem.simpleText('\n\n'.join((TITLE, '올바르지 않은 입력값이에요.')), [RETRY])
         else:
             bt = nb.check(input_, userdata[1])
             count = userdata[2] + 1

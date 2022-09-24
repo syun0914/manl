@@ -1,0 +1,9 @@
+BOT_IDS = {
+    'test_kakao_bot_id'
+}
+
+DB_SETTING = {
+    'check_same_thread': False
+}
+
+SUPER_KEY = 'test_api_key'

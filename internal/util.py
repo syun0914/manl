@@ -1,12 +1,11 @@
 import random as r
-from multiprocessing.connection import Client
-from re import compile, findall
-from bs4 import BeautifulSoup as bs
-from sympy import expand, Symbol
-from datetime import datetime as dti, timedelta as td
-from xmltodict import parse as xp
+
 from aiohttp import ClientSession
-from typing import Optional
+from datetime import datetime as dti, timedelta as td
+from bs4 import BeautifulSoup as BS
+from re import compile, findall
+from sympy import expand, Symbol
+from xmltodict import parse as xp
 
 
 FIRST_DAY = '''
@@ -26,13 +25,15 @@ AREA_LIST = [
     '대전', '광주', '인천', '대구', '부산', '서울'
 ]
 
-async def meal(dt: str, mt: int, ntr: bool=False):
+async def meal(dt: str, mt: int, ntr: bool = False) -> dict[str, str]:
     '''
-    주어진 인자들로 급식 정보를 얻습니다.
-    
-    (조건) dt는 YYYYMMDD(연도 4자리-월 2자리-일 2자리)의 형식으로 입력해야 합니다.
-           mt는 1(아침), 2(점심), 3(저녁)이어야 합니다.
-           ntr은 True(영양소 정보), False(메뉴)여야 합니다.
+    급식 정보 불러오기
+    -----
+    급식 정보를 불러옵니다.
+
+    * dt: YYYYMMDD(예: 20200608)
+    * mt: 1(아침) | 2(점심) | 3(저녁)
+    * ntr: True(영양소 정보) | False(메뉴)
     '''
     dt = str(dt).replace('-', '')
     p = OLD_P if int(dt) < 20220415 else NEW_P
@@ -70,12 +71,14 @@ async def meal(dt: str, mt: int, ntr: bool=False):
 
 
 async def _get_covid(
-    loc: str, dat: int, an: int, session: Optional[ClientSession]=None
+    loc: str, dat: int, an: int, session: ClientSession | None = None
 ):
     '''
-    주어진 인자들로 코로나19 정보를 얻습니다.
-    (조건) loc는 ''나 'Sido'
-    (권장) an은 _getCovidAC를 통해 입력하는 것을 권장합니다.
+    코로나19 정보 불러오기
+    -----
+    오늘에서 dat 일 전의 코로나19 정보를 불러옵니다.
+
+    * loc: ''(국내) | 'Sido'(시·도)
     '''
     sess = session or ClientSession()
     a = (dti.today()-td(dat)).strftime('%Y%m%d')
@@ -101,14 +104,15 @@ async def _get_covid(
     return b if loc else b[an]
 
 
-async def covid(a: str, session: Optional[ClientSession]=None):
+async def covid(area_name: str, session: ClientSession | None = None):
     '''
-    a(지역·구분 이름)으로 코로나19 정보를 얻고,
-    title(제목 포함 여부)에 따라 제목을 반환합니다.
+    코로나19 정보 불러오기
+    -----
+    대한민국의 코로나19 정보를 불러옵니다.
     '''
     sess = session or ClientSession()
     d = {}
-    ac = -1 if a == '한국' else AREA_LIST.index(a)
+    ac = -1 if area_name == '한국' else AREA_LIST.index(area_name)
     loc = '' if ac == -1 else 'Sido'
     bData = await _get_covid(loc, 1, ac, sess)
 
@@ -133,7 +137,7 @@ async def covid(a: str, session: Optional[ClientSession]=None):
         d['covid'] = '확진자 수: {}\n사망자 수: {}\n지역 발생: {}\n해외 유입: {}'.format(
             *map(am, ['def', 'death', 'localOcc', 'overFlow'])
         )
-    d['title'] = f'{a}, {dayName}의 코로나19 현황'
+    d['title'] = f'{area_name}, {dayName}의 코로나19 현황'
 
     if not session:
         await sess.close()
@@ -143,10 +147,12 @@ async def covid(a: str, session: Optional[ClientSession]=None):
 
 async def timetable(class_: str, day: str):
     '''
-    class_(학급)의 day(요일)의 시간표 정보를 불러옵니다.
+    시간표 정보 불러오기
+    -----
+    컴시간알리미에서 시간표 정보를 불러옵니다.
 
-    (조건) class_는 0-0(학년-반)의 형식으로 입력해야 합니다.
-           day는 monday, tuesday, wednesday, thursday, friday여야 합니다.
+    * class_: 학급(예: 3학년 1반 -> 3-1)
+    * day: monday(월요일) | tuesday(화요일) | wednesday(수요일) | thursday(목요일) | friday(금요일)
     '''
     async with ClientSession() as sess:
         async with sess.get(
@@ -167,6 +173,8 @@ async def timetable(class_: str, day: str):
 
 def abn(n: int):
     '''
+    (a+b)^n 전개하기
+    -----
     (a+b)^n의 전개식을 출력합니다.
     '''
     e = str(expand((Symbol('a')+Symbol('b'))**n)).replace('*', '')
@@ -180,7 +188,9 @@ def abn(n: int):
 
 async def school_notice():
     '''
-    학교 공지사항을 c개만큼 불러옵니다.
+    학교 공지사항 불러오기
+    -----
+    서일중학교 공지사항을 불러옵니다.
     '''
     BSTR = 'http://seo-il.cnems.kr/boardCnts/updateCnt.do?boardID={}' \
     	   '&viewBoardID={}&boardSeq={}&lev={}&action=view&searchType=null' \
@@ -190,7 +200,7 @@ async def school_notice():
             'http://seo-il.cnems.kr/boardCnts/list.do?' \
             'boardID=30405&m=0505&s=seo_il'
         ) as resp:
-            a = bs(await resp.text(), 'lxml').find('div', class_='BD_table')
+            a = BS(await resp.text(), 'lxml').find('div', class_='BD_table')
     title, ls = [], []
     for s in a.find_all('a'):
         title += [s['title']]
@@ -200,9 +210,11 @@ async def school_notice():
     return zip(title, writer, url)
 
 
-async def adult_detect(url: str):
+async def adult_detect(url: str) -> dict:
     '''
-    url의 성인 이미지일 확률을 얻습니다.
+    성인 이미지 판별하기
+    ----
+    카카오 API를 사용하여 url의 성인 이미지 여부에 관한 정보를 불러옵니다.
     '''
     async with ClientSession() as sess:
         async with sess.post(
@@ -213,16 +225,28 @@ async def adult_detect(url: str):
             return (await resp.json())['result']
 
 
-def lotto():
-    '''무작위로 로또 번호 리스트를 생성합니다.'''
+def lotto() -> list[int]:
+    '''
+    로또 번호 추첨하기
+    -----
+    무작위로 로또 번호 리스트를 생성합니다.
+    '''
     return sorted(r.sample(range(1, 46), 6))
 
 
 def is_hangul(s: str) -> bool:
-    '''s(문자열)가 한글로만 이루어졌는지 판별합니다.'''
+    '''
+    한글 여부 판별하기
+    -----
+    s가 한글로만 이루어졌는지 판별합니다.
+    '''
     return len(findall('[\sㄱ-ᇿ・-ーㄱ-ㆎꥠ-ꥼ가-힣ힰ-ퟻﾡ-ￜ]', s)) == len(s)
 
 
 def is_hanja(s: str) -> bool:
-    '''s(문자열)가 한자로만 이루어졌는지 판별합니다.'''
+    '''
+    한자 여부 판별하기
+    -----
+    s가 한자로만 이루어졌는지 판별합니다.
+    '''
     return len(findall('[一-龿㐀-\u4dbf⺀-\u2eff豈-\ufaff]', s)) == len(s)

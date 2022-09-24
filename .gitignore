@@ -2,6 +2,7 @@
 config.py
 *.db
 nohup.out
+*.code-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

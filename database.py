@@ -5,7 +5,7 @@ con = connect('kakao.db', **DB_SETTING)
 cur = con.cursor()
 
 
-async def permission(user_key: str, r: int=1) -> bool:
+async def permission(user_key: str, r: int = 1) -> bool:
     '''
     user_key의 권한과 r(최소 권한)로
     특정 기능의 사용 가능 여부를 판별합니다.

@@ -1,8 +1,7 @@
 from random import randint
-from typing import Optional
 
 
-def check(input_: str, answer: str):
+def check(input_: str, answer: str) -> str:
     strike = 0
     for s1, s2 in zip(input_, answer):
         if s1 == s2:
@@ -11,7 +10,7 @@ def check(input_: str, answer: str):
     return f'{strike}S {ball}B' if strike or ball else 'OUT'
 
 
-def new(i: Optional[str]=None):
+def new(i: str | None = None) -> str:
     while not i or len(set(i)) < 4:
         i = str(randint(123, 9876)).zfill(4)
     return i
