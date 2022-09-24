@@ -1,6 +1,5 @@
 from sys import _getframe
-from json import dumps, loads
-from typing import Any, Optional, Union
+from typing import Optional, Union
 from dataclasses import field, asdict, dataclass
 
 
@@ -47,7 +46,7 @@ def data(**x):
     '''
     주어진 인자들을 data 챗봇 템플릿으로 변환합니다.
     '''
-    return dumps({'version': '2.0', 'data': del_empty(x)})
+    return {'version': '2.0', 'data': del_empty(x)}
 
 
 def simpleImage(
