@@ -149,10 +149,11 @@ async def timetable(class_: str, day: str):
            day는 monday, tuesday, wednesday, thursday, friday여야 합니다.
     '''
     async with ClientSession() as sess:
-        d = (await sess.get(
+        async with sess.get(
             'https://biqapp.com/api/v1/timetable/50494/'
             + class_.replace('-', '/')
-        )).json()['school']['timetable'][day].items()
+        ) as resp:
+            d = (await resp.json())['school']['timetable'][day].items()
 
     return {
         'timeTable': '\n'.join(
