@@ -153,7 +153,7 @@ async def timetable(class_: str, day: str):
             'https://biqapp.com/api/v1/timetable/50494/'
             + class_.replace('-', '/')
         ) as resp:
-            d = (await resp.json())['school']['timetable'][day].items()
+            d = (await resp.json('text/html'))['school']['timetable'][day].items()
 
     return {
         'timeTable': '\n'.join(
