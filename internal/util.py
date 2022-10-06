@@ -59,7 +59,7 @@ async def meal(dt: str, mt: int, ntr: bool = False) -> dict[str, str]:
         d = '\n'.join(
             [p.sub(r' \1', s) for s in l.split('<br/>')]
         ).replace('  ', '')
-    except KeyError as e:
+    except KeyError:
         if int(dt) < 20200701:
             d = '2020년 7월 1일보다 이전의 급식은 찾을 수 없습니다.'
         else:

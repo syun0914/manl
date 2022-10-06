@@ -12,7 +12,7 @@ async def api_key(
     api_key_query: str = Security(api_key_query),
     api_key_header: str = Security(api_key_header),
     api_key_cookie: str = Security(api_key_cookie),
-) -> dict | HTTPException:
+) -> dict:
     if api_key_query == SUPER_KEY:
         return api_key_query
     elif api_key_header == SUPER_KEY:
@@ -23,7 +23,7 @@ async def api_key(
         raise HTTPException(401)
 
 
-async def kakao_bot(request: Request) -> dict | HTTPException:
+async def kakao_bot(request: Request) -> dict:
     try:
         req: dict = await request.json()
     except:

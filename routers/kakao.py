@@ -1,14 +1,13 @@
 import orjson as j
 import internal.num_baseball as nb
 import internal.tem as tem
+import yaml as y
 
-from database import con, cur, permission, IntegrityError
+from databases.database import con, cur, permission, IntegrityError
 from dependencies import api_key, kakao_bot
 from fastapi import APIRouter, Depends
 from re import findall
-from random import randint
 from time import time
-from typing import Dict, List, Tuple
 
 from fastapi.security.api_key import APIKey
 from internal.util import *
@@ -131,10 +130,11 @@ async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
 
         menu: str = params['menu']
-        query: dict[str, str] = dict(findall(
-            ' ?(user_key|name|student_ID|level) ?: ?(.*?); ?',
-            params['query']
-        ))
+        query: dict[str, str] = y.load(params['query'], Loader=y.FullLoader)
+        #query: dict[str, str] = dict(findall(
+        #    ' ?(user_key|name|student_ID|level) ?: ?(.*?); ?',
+        #    params['query']
+        #))
         
         if menu == '추가' and len(query) == 4:
             try:
