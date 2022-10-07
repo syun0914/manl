@@ -1,7 +1,7 @@
 from config import DB_SETTING
 from sqlite3 import connect, IntegrityError
 
-con = connect('kakao.db', **DB_SETTING)
+con = connect('databases/kakao.db', **DB_SETTING)
 cur = con.cursor()
 
 

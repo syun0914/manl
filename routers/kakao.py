@@ -81,7 +81,17 @@ async def skill(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             'QR코드를 생성하는데 문제가 발생했어요.',
             [RETRY]
         )
-
+    
+    if bn == '건의':
+        if not await permission(user_key):
+            return tem.simpleText(WEAK)
+        mt = params['mealtime']
+        d = await meal(
+            j.loads(params['date'])['value'],
+            1 if mt == '조식' else (2 if mt == '중식' else 3)
+        )
+        return tem.data(d=d['meal'], t=d['title'])
+    
     else:
         return tem.data(d='B#다4%^바*-N0+2T|타6!@8')
 
@@ -130,11 +140,13 @@ async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
 
         menu: str = params['menu']
-        query: dict[str, str] = y.load(params['query'], Loader=y.FullLoader)
-        #query: dict[str, str] = dict(findall(
-        #    ' ?(user_key|name|student_ID|level) ?: ?(.*?); ?',
-        #    params['query']
-        #))
+        try:
+            query: dict[str, str] = y.load(params['query'].replace(', ', '\n'), Loader=y.FullLoader)
+        except:
+            return tem.simpleText(
+                f'{TITLE}\n\n올바르지 않은 행동이에요. YAML+쉼표 형식으로 보냈는지 확인해주세요.',
+                [RETRY]
+            )
         
         if menu == '추가' and len(query) == 4:
             try:
@@ -198,7 +210,7 @@ async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             )
         else:
             return tem.simpleText(
-                f'{TITLE}\n\n올바르지 않은 행동이에요. 세미콜론(;)을 붙였는지 확인해주세요.',
+                f'{TITLE}\n\n올바르지 않은 행동이에요. YAML+쉼표 형식으로 보냈는지 확인해주세요.',
                 [RETRY]
             )
 
