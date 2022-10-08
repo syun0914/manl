@@ -1,6 +1,6 @@
 import orjson as j
 import internal.num_baseball as nb
-import internal.tem as tem
+import internal.kakao_template as tem
 import yaml as y
 
 from databases.database import con, cur, permission, IntegrityError
@@ -141,10 +141,12 @@ async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
 
         menu: str = params['menu']
         try:
-            query: dict[str, str] = y.load(params['query'].replace(', ', '\n'), Loader=y.FullLoader)
+            query: dict[str, str] = y.load(
+                params['query'].replace(', ', '\n'), Loader=y.FullLoader
+            )
         except:
             return tem.simpleText(
-                f'{TITLE}\n\n올바르지 않은 행동이에요. YAML+쉼표 형식으로 보냈는지 확인해주세요.',
+                f'{TITLE}\n\n올바르지 않은 행동이에요. 쉼표로 구분한 YAML로 보냈는지 확인해주세요.',
                 [RETRY]
             )
         
@@ -210,7 +212,7 @@ async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             )
         else:
             return tem.simpleText(
-                f'{TITLE}\n\n올바르지 않은 행동이에요. YAML+쉼표 형식으로 보냈는지 확인해주세요.',
+                f'{TITLE}\n\n올바르지 않은 행동이에요. 쉼표로 구분한 YAML로 보냈는지 확인해주세요.',
                 [RETRY]
             )
 

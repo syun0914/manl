@@ -31,18 +31,19 @@ def del_empty(object: dict | list) -> dict | list:
         return [c for c in object if c]
 
 
-def t_filter(td: dict) -> dict:
-    funcName = _getframe(1).f_code.co_name
+def t_filter(td: dict, k_type: str) -> dict:
     qReplies = td['template'].get('quickReplies')
-    home = td['template']['outputs'][0][funcName]
-    if not qReplies and qReplies != None:
+    home = td['template']['outputs'][0][k_type]
+    if not qReplies and type(qReplies) != list:
         del td['template']['quickReplies']
-    td['template']['outputs'][0][funcName] = del_empty(home)
+    td['template']['outputs'][0][k_type] = del_empty(home)
     return td
 
 
 def data(**x) -> dict:
     '''
+    챗봇 템플릿 (데이터)
+    -----
     주어진 인자들을 data 챗봇 템플릿으로 변환합니다.
     '''
     return {'version': '2.0', 'data': del_empty(x)}
@@ -55,8 +56,9 @@ def simpleImage(
     buttons: list[Button] | None = None
 ) -> dict:
     '''
+    챗봇 템플릿 (이미지)
+    -----
     주어진 인자들을 simpleImage 챗봇 템플릿으로 변환합니다.
-    (조건) qReplies는 qReply, buttons는 button 클래스를 통해 입력해야 합니다.
     '''
     a = {
         'version': '2.0',
@@ -72,7 +74,7 @@ def simpleImage(
         }
     }
     
-    return t_filter(a)
+    return t_filter(a, 'simpleImage')
 
 
 def simpleText(
@@ -82,8 +84,9 @@ def simpleText(
     fw: bool = False
 ) -> dict:
     '''
+    챗봇 템플릿 (텍스트)
+    -----
     주어진 인자들을 simpleText 챗봇 템플릿으로 변환합니다.
-    (조건) qReplies는 qReply, buttons는 button 클래스를 통해 입력해야 합니다.
     '''
     a = {
         'version': '2.0',
@@ -98,7 +101,7 @@ def simpleText(
             )
         }
     }
-    return t_filter(a)
+    return t_filter(a, 'simpleText')
 
 
 def listCard(
@@ -109,8 +112,9 @@ def listCard(
     fw: bool = False
 ) -> dict:
     '''
+    챗봇 템플릿 (리스트 카드)
+    -----
     주어진 인자들을 listCard 챗봇 템플릿으로 변환합니다.
-    (조건) qReplies는 qReply, buttons는 button 클래스를 통해 입력해야 합니다.
     '''
     a = {
         'version': '2.0',
@@ -126,16 +130,16 @@ def listCard(
             )
         }
     }
-    return t_filter(a)
+    return t_filter(a, 'listCard')
 
 
 def carousel(
     kType: str, templates: list, qReplies: list[QReply] | None = None
 ) -> dict:
     '''
+    챗봇 템플릿 (캐로셀)
+    -----
     주어진 인자들을 carousel 챗봇 템플릿으로 변환합니다.
-    (조건) templates는 이 모듈의 다른 함수들을,
-           qReplies는 qReply, buttons는 button 클래스를 통해 입력해야 합니다.
     '''
     a = {
         'version': '2.0',
@@ -151,4 +155,4 @@ def carousel(
             )
         }
     }
-    return t_filter(a)
+    return t_filter(a, 'carousel')
