@@ -1,5 +1,4 @@
-from fastapi import Depends, FastAPI, Request
-from dependencies import api_key
+from fastapi import FastAPI, Request
 from routers import kakao
 import pyotp
 
@@ -14,11 +13,10 @@ async def index():
 
 @app.get('/show_OTP')
 async def show_OTP(request: Request):
-    '''
-    TOTP 키 보여주기
-    -----
+    '''TOTP 키 보여주기
+
     생성된 TOTP 키를 1회에 한해 보여줍니다.
     '''
-    return {'alive': True}
+    ...
 
 app.include_router(kakao.router)

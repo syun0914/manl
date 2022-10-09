@@ -8,7 +8,7 @@ api_key_header = APIKeyHeader(name='key', auto_error=False)
 api_key_query = APIKeyQuery(name='key', auto_error=False)
 
 
-async def api_key(
+async def get_api_key(
     api_key_query: str = Security(api_key_query),
     api_key_header: str = Security(api_key_header),
     api_key_cookie: str = Security(api_key_cookie),

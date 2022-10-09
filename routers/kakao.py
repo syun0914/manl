@@ -1,14 +1,14 @@
-import orjson as j
-import internal.num_baseball as nb
 import internal.kakao_template as tem
+import orjson as j
 import yaml as y
 
-from databases.database import con, cur, permission, IntegrityError
-from dependencies import api_key, kakao_bot
+from dependencies import get_api_key, kakao_bot
 from fastapi import APIRouter, Depends
-from re import findall
+from random import sample
+from sqlite3 import IntegrityError
 from time import time
 
+from databases.database import con, cur, permission
 from fastapi.security.api_key import APIKey
 from internal.util import *
 
@@ -16,12 +16,18 @@ router = APIRouter()
 
 
 @router.post('/skill')
-async def skill(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
-    '''
-    일반 백엔드 API
-    -----
+async def skill(
+    k_req: dict = Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
+):
+    '''일반 백엔드 API
+
     마늘의 일반 백엔드 API입니다.
+
+    인자:
+        k_req: 카카오에서 받은 페이로드
+        api_key: API 키
     '''
+
     user_req = k_req['userRequest']
     bot = k_req['bot']
     params = k_req['action']['params']
@@ -97,10 +103,11 @@ async def skill(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
 
 
 @router.post('/admin')
-async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
-    '''
-    관리자 백엔드 API
-    -----
+async def admin(
+    k_req=Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
+):
+    '''관리자 백엔드 API
+
     마늘의 관리자 백엔드 API입니다.
     '''
     user_req = k_req['userRequest']
@@ -238,10 +245,11 @@ async def admin(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
 
 
 @router.post('/etc')
-async def etc(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
-    '''
-    기타 백엔드 API
-    -----
+async def etc(
+    k_req=Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
+):
+    '''기타 백엔드 API
+
     마늘의 기타 백엔드 API입니다.
     '''
     user_req = k_req['userRequest']
@@ -261,10 +269,11 @@ async def etc(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
 
 
 @router.post('/game')
-async def game(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
-    '''
-    게임 백엔드 API
-    -----
+async def game(
+    k_req=Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
+):
+    '''게임 백엔드 API
+
     마늘의 게임 백엔드 API입니다.
     '''
     user_req = k_req['userRequest']
@@ -287,7 +296,7 @@ async def game(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             try:
                 cur.execute(
                 	'INSERT INTO num_baseball VALUES (?, ?, 0, ?);',
-                	(user_key, nb.new(), time())
+                	(user_key, ''.join(map(sample(range(9), 4))), time())
             	)
                 message = '게임을 시작했어요. 숫자야구를 다시 실행해 숫자를 입력해주세요.'
                 con.commit()
@@ -335,10 +344,12 @@ async def game(k_req=Depends(kakao_bot), api_key: APIKey = Depends(api_key)):
             return tem.listCard(
                 TITLE, [tem.KList(*t) for t in res], [RETRY]
             )
+
         elif len(set(input_)) != 4 or not input_.isdigit():
             return tem.simpleText('\n\n'.join((TITLE, '올바르지 않은 입력값이에요.')), [RETRY])
+
         else:
-            bt = nb.check(input_, userdata[1])
+            bt = num_baseball_check(input_, userdata[1])
             count = userdata[2] + 1
             msg = '성공' if bt == '4S 0B' else '실패'
             if msg == '성공':
