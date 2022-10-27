@@ -88,7 +88,7 @@ async def skill(
             [RETRY]
         )
     
-    if bn == '건의':
+    elif bn == '건의':
         if not await permission(user_key):
             return tem.simpleText(WEAK)
         mt = params['mealtime']
