@@ -2,6 +2,7 @@ import internal.kakao_template as tem
 import orjson as j
 import yaml as y
 
+from comcigan import AsyncSchool
 from dependencies import get_api_key, kakao_bot
 from fastapi import APIRouter, Depends
 from random import sample
@@ -57,9 +58,10 @@ async def skill(
     elif bn == '시간표':
         if not await permission(user_key):
             return tem.data(d=WEAK, t='사용 불가')
+
         d = await timetable('3-1', params['day'])
         return tem.data(d=d['timeTable'], t=d['title'])
-    
+
     elif bn == '사용자 키':
         return tem.simpleText(user_key)
     

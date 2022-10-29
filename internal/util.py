@@ -1,5 +1,6 @@
 from aiohttp import ClientSession
 from datetime import datetime, timedelta
+from comcigan import AsyncSchool
 from bs4 import BeautifulSoup as BS
 from random import sample
 from re import compile, findall
@@ -23,7 +24,13 @@ AREA_LIST = [
     '충남', '충북', '강원', '경기', '세종', '울산',
     '대전', '광주', '인천', '대구', '부산', '서울'
 ]
-
+DAY_NAME = {
+    'monday': 0,
+    'tuesday': 1,
+    'wednesday': 2,
+    'thursday': 3,
+    'friday': 4
+}
 
 async def meal(
     date: str, mealtime: int, nutrient: bool = False
@@ -163,14 +170,8 @@ async def timetable(class_: str, day: str) -> dict:
         class_: 학급(예: 3학년 1반 -> '3-1')
         day: 영문 요일명(예: 'monday')
     '''
-    async with ClientSession() as sess:
-        async with sess.get(
-            'https://biqapp.com/api/v1/timetable/50494/'
-            + class_.replace('-', '/')
-        ) as resp:
-            d = (
-                await resp.json(content_type='text/html')
-            )['school']['timetable'][day].items()
+    class_ = class_.split('-')
+    d = AsyncSchool('서일중학교')[class_[0]][class_[1]][DAY_NAME[day]]
 
     return {
         'timeTable': '\n'.join(
