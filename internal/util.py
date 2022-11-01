@@ -170,10 +170,10 @@ async def timetable(class_: str, day: str) -> dict:
         class_: 학급(예: 3학년 1반 -> '3-1')
         day: 영문 요일명(예: 'monday')
     '''
-    class_ = class_.split('-')
+    c = class_.split('-')
     d = (
         await AsyncSchool.init('서일중학교')
-    )[int(class_[0])][int(class_[1])][DAY_NAME[day]]
+    )[int(c[0])][int(c[1])][DAY_NAME[day]]
 
     return {
         'timetable': '\n'.join(
