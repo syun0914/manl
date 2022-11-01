@@ -174,8 +174,8 @@ async def timetable(class_: str, day: str) -> dict:
     d = AsyncSchool('서일중학교')[class_[0]][class_[1]][DAY_NAME[day]]
 
     return {
-        'timeTable': '\n'.join(
-            f'{k}교시: {v["sb"] or "없음"}' for k, v in d if k != '8'
+        'timetable': '\n'.join(
+            f'{ct}교시: {sj or "없음"}({tc})' for ct, sj, tc in d
         ),
         'title': class_ + '반 시간표'
     }

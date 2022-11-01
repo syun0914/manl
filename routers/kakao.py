@@ -60,7 +60,7 @@ async def skill(
             return tem.data(d=WEAK, t='사용 불가')
 
         d = await timetable('3-1', params['day'])
-        return tem.data(d=d['timeTable'], t=d['title'])
+        return tem.data(d=d['timetable'], t=d['title'])
 
     elif bn == '사용자 키':
         return tem.simpleText(user_key)

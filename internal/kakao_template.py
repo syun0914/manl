@@ -1,5 +1,7 @@
 from dataclasses import asdict, dataclass, field
 
+VERSION = '2.0'
+
 
 @dataclass
 class QReply:
@@ -14,7 +16,6 @@ class QReply:
         blockId: action == 'message'일 경우 {blockId}인 블록을 호출합니다.
         extra: 스킬 서버에 추가적으로 제공하는 정보
     '''
-
     label: str = ''
     action: str = ''
     messageText: str = ''
@@ -41,7 +42,6 @@ class ListItem:
         messageText: action == 'message'일 경우 사용자의 발화로 내보냅니다.
         extra: 스킬 서버에 추가적으로 제공할 정보
     '''
-
     title: str
     description: str = ''
     imageUrl: str = ''
@@ -83,7 +83,7 @@ def t_filter(td: dict, k_type: str) -> dict:
 
     인자:
         td: 카카오 챗봇 템플릿
-        k_type: 카카오 챗봇 템플릿 타입
+        k_type: 카카오 챗봇 템플릿의 타입
     '''
     qReplies = td['template'].get('quickReplies')
     home = td['template']['outputs'][0][k_type]
@@ -101,7 +101,7 @@ def data(**kwargs) -> dict:
     키워드 인자:
         kwargs: 데이터
     '''
-    return {'version': '2.0', 'data': del_empty(kwargs)}
+    return {'version': VERSION, 'data': del_empty(kwargs)}
 
 
 def simpleImage(
@@ -121,7 +121,7 @@ def simpleImage(
         buttons: 버튼
     '''
     a = {
-        'version': '2.0',
+        'version': VERSION,
         'template': {
             'outputs': [{'simpleImage': {
                 'imageUrl': url,
@@ -154,7 +154,7 @@ def simpleText(
         forwardable: 전달 가능 여부
     '''
     a = {
-        'version': '2.0',
+        'version': VERSION,
         'template': {
             'outputs': [{'simpleText': {
                 'text': text,
@@ -188,7 +188,7 @@ def listCard(
         forwardable: 전달 가능 여부
     '''
     a = {
-        'version': '2.0',
+        'version': VERSION,
         'template': {
             'outputs': [{'listCard': {
                 'header': {'title': title},
@@ -217,7 +217,7 @@ def carousel(
         q_replies: 카카오 챗봇 바로가기 응답
     '''
     a = {
-        'version': '2.0',
+        'version': VERSION,
         'template': {
             'outputs': [{'carousel': {
                 'type': k_type,

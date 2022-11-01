@@ -3,6 +3,7 @@ config.py
 *.db
 nohup.out
 *.code-workspace
+TODO.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
