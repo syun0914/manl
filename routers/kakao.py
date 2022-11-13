@@ -10,13 +10,14 @@ from sqlite3 import IntegrityError
 from time import time
 
 from databases.database import con, cur, permission
+from fastapi.responses import ORJSONResponse
 from fastapi.security.api_key import APIKey
 from internal.util import *
 
 router = APIRouter()
 
 
-@router.post('/skill')
+@router.post('/skill', response_class=ORJSONResponse)
 async def skill(
     k_req: dict = Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
 ):
@@ -104,7 +105,7 @@ async def skill(
         return tem.data(d='B#다4%^바*-N0+2T|타6!@8')
 
 
-@router.post('/admin')
+@router.post('/admin', response_class=ORJSONResponse)
 async def admin(
     k_req=Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
 ):
@@ -151,7 +152,8 @@ async def admin(
         menu: str = params['menu']
         try:
             query: dict[str, str] = y.load(
-                params['query'].replace(', ', '\n'), Loader=y.FullLoader
+                stream=params['query'].replace(', ', '\n').replace(',', '\n'),
+                Loader=y.FullLoader
             )
         except:
             return tem.simpleText(
@@ -246,7 +248,7 @@ async def admin(
         return tem.data(d='B#다4%^바*-N0+2T|타6!@8')
 
 
-@router.post('/etc')
+@router.post('/etc', response_class=ORJSONResponse)
 async def etc(
     k_req=Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
 ):
@@ -270,7 +272,7 @@ async def etc(
         return tem.data(d='B#다4%^바*-N0+2T|타6!@8')
 
 
-@router.post('/game')
+@router.post('/game', response_class=ORJSONResponse)
 async def game(
     k_req=Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
 ):
@@ -373,4 +375,3 @@ async def game(
 
     else:
         return tem.data(d='B#다4%^바*-N0+2T|타6!@8')
-    # https://builder.pingpong.us/api/builder/5f362984e4b00e31991555f5/chat/simulator?query=%EC%9A%95%ED%95%B4%EB%B4%90

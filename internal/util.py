@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from comcigan import AsyncSchool
 from bs4 import BeautifulSoup as BS
 from random import sample
-from re import compile, findall
+from re import compile, findall, finditer
 from sympy import expand, Symbol
 from xmltodict import parse as xp
 
@@ -171,13 +171,13 @@ async def timetable(class_: str, day: str) -> dict:
         day: 영문 요일명(예: 'monday')
     '''
     c = class_.split('-')
-    d = (
-        await AsyncSchool.init('서일중학교')
-    )[int(c[0])][int(c[1])][DAY_NAME[day]]
+    d = (await AsyncSchool.init('서일중학교')
+         )[int(c[0])][int(c[1])][DAY_NAME[day]]
 
     return {
         'timetable': '\n'.join(
-            f'{ct}교시: {sj or "없음"}({tc})' for ct, sj, tc in d
+            f'{ct + 1}교시: {sj or "없음"}({tc})' \
+            for ct, (_, sj, tc) in enumerate(d)
         ),
         'title': class_ + '반 시간표'
     }
@@ -189,9 +189,9 @@ def abn(n: int) -> str:
     (a+b)^n의 전개식을 출력합니다.
     '''
     e = str(expand((Symbol('a')+Symbol('b'))**n)).replace('*', '')
-    for s in findall('a\d+b\d+|[a|b]\d+', e):
+    for s in finditer('a\d+b\d+|[a|b]\d+', e):
         e = e.replace(s, s.translate({
-        	48: 8304, 49:  185, 50:  178, 51:  179, 52: 8308,
+        	48: 8304, 49: 185, 50: 178, 51: 179, 52: 8308,
        		53: 8309, 54: 8310, 55: 8311, 56: 8312, 57: 8313
     	}))
     return e

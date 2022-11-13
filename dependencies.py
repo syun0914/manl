@@ -24,7 +24,7 @@ async def get_api_key(
         api_key_query: GET의 파라미터에서 가져온 API KEY
     
     예외:
-        HTTPException: 401 Unauthrized
+        HTTPException: 401
     '''
     if SUPER_KEY in {api_key_query, api_key_header, api_key_cookie}:
         return api_key_query
@@ -42,12 +42,12 @@ async def kakao_bot(request: Request) -> dict:
         request: 리퀘스트
     
     예외:
-        HTTPException: 401 Unauthrized
+        HTTPException: 401
     '''
     try:
         req: dict = await request.json()
     except:
-        req = dict()
+        raise HTTPException(401)
     if req.get('bot') and req['bot']['id'] in BOT_IDS:
         return req
     else:

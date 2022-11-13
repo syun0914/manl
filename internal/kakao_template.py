@@ -37,7 +37,7 @@ class ListItem:
             pc: PC에서 보일 링크
             mobile: 모바일에서 보일 링크
             web: 웹에서 보일 링크
-        action: 눌렀을 때 수행할 동작, 'block' 또는 'message'
+        action: 눌렀을 때 수행할 동작, 'block' 또는 'message'입니다.
         blockId: action == 'message'일 경우 {blockId}인 블록을 호출합니다.
         messageText: action == 'message'일 경우 사용자의 발화로 내보냅니다.
         extra: 스킬 서버에 추가적으로 제공할 정보
