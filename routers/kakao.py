@@ -158,7 +158,7 @@ async def admin(
             )
         except:
             return tem.simpleText(
-                f'{TITLE}\n\n올바르지 않은 행동이에요. 쉼표로 구분한 YAML로 보냈는지 확인해주세요.',
+                f'{TITLE}\n\n{query}'#올바르지 않은 행동이에요. 쉼표로 구분한 YAML로 보냈는지 확인해주세요.',
                 [RETRY]
             )
         
