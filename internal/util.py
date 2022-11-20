@@ -164,11 +164,11 @@ async def covid(area_name: str, session: ClientSession | None = None) -> dict:
 async def timetable(class_: str, day: str) -> dict:
     '''시간표 정보 불러오기
 
-    컴시간알리미에서 시간표 정보를 불러옵니다.
+    컴시간알리미에서 {class_}의 {day}요일 시간표 정보를 불러옵니다.
 
     인자:
-        class_: 학급(예: 3학년 1반 -> '3-1')
-        day: 영문 요일명(예: 'monday')
+        class_: 학급 (예: '3-1')
+        day: 영문 요일명 (예: 'monday')
     '''
     c = class_.split('-')
     d = (await AsyncSchool.init('서일중학교')
@@ -184,9 +184,9 @@ async def timetable(class_: str, day: str) -> dict:
 
 
 def abn(n: int) -> str:
-    '''(a+b)^n 전개하기
+    '''(a+b)의 거듭제곱꼴 전개하기
 
-    (a+b)^n의 전개식을 출력합니다.
+    (a+b)^{n}의 전개식을 출력합니다.
     '''
     e = str(expand((Symbol('a')+Symbol('b'))**n)).replace('*', '')
     for s in finditer('a\d+b\d+|[a|b]\d+', e):

@@ -37,9 +37,12 @@ class ListItem:
             pc: PC에서 보일 링크
             mobile: 모바일에서 보일 링크
             web: 웹에서 보일 링크
-        action: 눌렀을 때 수행할 동작, 'block' 또는 'message'입니다.
-        blockId: action == 'message'일 경우 {blockId}인 블록을 호출합니다.
-        messageText: action == 'message'일 경우 사용자의 발화로 내보냅니다.
+        action: 눌렀을 때 수행할 동작, 종류와 설명은 아래 [종류]와 같습니다.
+            종류:
+                'block': {blockId}를 갖는 블록을 호출합니다.
+                'message': 사용자의 발화로 {messageText}를 실행합니다.
+        blockId: {action}이 'block'일 경우 호출할 블록 ID
+        messageText: {action}이 'message'일 경우 사용자의 발화로 내보낼 텍스트
         extra: 스킬 서버에 추가적으로 제공할 정보
     '''
     title: str
@@ -54,7 +57,33 @@ class ListItem:
 
 @dataclass
 class Button:
-    pass
+    '''카카오 챗봇 버튼
+
+    카카오 챗봇에서 버튼으로 들어갑니다.
+
+    속성:
+        label: 적히는 문구
+        action: 눌렀을 때 수행할 동작, 종류와 설명은 아래 [종류]와 같습니다.
+            종류:
+                'block': {blockID}를 갖는 블록을 호출합니다.
+                'message': 사용자의 발화로 {messageText}를 실행합니다.
+                'webLink': {webLinkUrl}의 URL로 이동합니다.
+                'phone': {phoneNumber}의 전화번호로 전화를 겁니다.
+                'share': 말풍선을 다른 사용자에게 공유합니다.
+                'operator': 상담직원을 연결합니다.
+        webLinkUrl: {action}이 'webLink'일 경우 버튼을 눌렀을 때 이동할 URL
+        phoneNumber: {action}이 'phone'일 경우 버튼을 눌렀을 때 전화할 전화번호
+        blockId: {action}이 'message'일 경우 {blockId}인 블록을 호출합니다.
+        messageText: {action}이 'message', 'block'일 경우 사용자의 발화로 내보낼 텍스트
+        extra: 스킬 서버에 추가적으로 제공할 정보
+    '''
+    label: str
+    action: str
+    webLinkUrl: str = ''
+    messageText: str = ''
+    phoneNumber: str = ''
+    blockID: str = ''
+    extra: str = None
 
 
 def del_empty(object: dict | list) -> dict | list:

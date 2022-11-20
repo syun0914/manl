@@ -48,27 +48,28 @@ async def skill(
             j.loads(params['date'])['value'],
             1 if mt == '조식' else (2 if mt == '중식' else 3)
         )
-        return tem.data(d=d['meal'], t=d['title'])
+        return tem.data(**d)
 
     elif bn == '코로나19 현황':
         if not await permission(user_key):
             return tem.data(d=WEAK, t='사용 불가')
         d = await covid(params['area'], True)
-        return tem.data(d=d['covid'], t=d['title'])
+        return tem.data(**d)
 
     elif bn == '시간표':
         if not await permission(user_key):
             return tem.data(d=WEAK, t='사용 불가')
-
         d = await timetable('3-1', params['day'])
-        return tem.data(d=d['timetable'], t=d['title'])
+        return tem.data(**d)
 
     elif bn == '사용자 키':
         return tem.simpleText(user_key)
     
     elif bn == '공지':
         cur.execute("SELECT content FROM bot WHERE field='notice';")
-        return tem.data(d=cur.fetchone()[0])
+        return tem.simpleText(
+            f'📢 공지\n\n{cur.fetchone()[0]}', [REFRESH], tem.Button('상담직원 연결', 'operator')
+        )
 
     elif bn == '학교 공지 목록':
         title = '📢 서일중학교 공지'
