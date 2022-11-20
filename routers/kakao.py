@@ -40,7 +40,7 @@ async def skill(
     RETRY = tem.QReply('🌀 다시하기', 'block', '🌀 다시하기', bi)
     REFRESH = tem.QReply('🌀 새로고침', 'block', '🌀 새로고침', bi)
 
-    if bn == '급식' or bn == '생일 급식':
+    if bn == '급식':
         if not await permission(user_key):
             return tem.data(d=WEAK, t='사용 불가')
         mt = params['mealtime']
@@ -138,12 +138,12 @@ async def admin(
     elif bn == '공지 수정':
         if not await permission(user_key, 3):
             return tem.simpleText(WEAK)
-        text = params['text']
         try:
-            cur.execute('UPDATE `notice` SET notice=? where num=0;', (text,))
+            cur.execute('UPDATE bot SET content=? WHERE field="notice"',
+                        (params['text'],))
             res = '성공'
             con.commit()
-        except:
+        except BaseException as e:
             res = '오류가 발생해 실패'
         return tem.simpleText(f'📢 공지 수정에 {res}했어요.', [RETRY])
     
@@ -195,7 +195,7 @@ async def admin(
         elif menu == '조회' and len(query) > 0:
             try:
                 cur.execute(f'''
-                    SELECT * FROM `users` WHERE
+                    SELECT * FROM users WHERE
                     {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}
                 ''')
                 userdata = cur.fetchone()
@@ -204,9 +204,9 @@ async def admin(
                     ('이름', userdata[1]), ('학번', userdata[2]),
                     ('등급·허가 상태', userdata[3])
                 ]
-                return tem.listCard(TITLE, [tem.KList(*t) for t in res], [RETRY])
-            except:
-                return tem.simpleText(f'{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
+                return tem.listCard(TITLE, [tem.ListItem(*t) for t in res], [RETRY])
+            except BaseException as e:
+                return tem.simpleText(str(e))#f'{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
         elif menu == '등급' and len(query) > 1:
             try:
                 cur.execute(
@@ -269,7 +269,7 @@ async def etc(
     REFRESH = tem.QReply('🌀 새로고침', 'block', '🌀 새로고침', bi)
     
     if bn == '도서관 책 검색':
-        return tem.simpleText('「도서관 책 검색」이 2022년 7월 22일에 서비스가 종료되었어요.')
+        return tem.simpleText('「도서관 책 검색」은 2022년 7월 22일에 서비스가 종료되었어요.')
 
     else:
         return tem.data(d='B#다4%^바*-N0+2T|타6!@8')
