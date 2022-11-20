@@ -179,7 +179,7 @@ async def timetable(class_: str, day: str) -> dict:
             f'{ct + 1}교시: {sj or "없음"}({tc})' \
             for ct, (_, sj, tc) in enumerate(d)
         ),
-        'title': class_ + '반 시간표'
+        'title': f'⌛️ {class_}반 시간표'
     }
 
 

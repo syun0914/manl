@@ -40,7 +40,7 @@ async def skill(
     RETRY = tem.QReply('🌀 다시하기', 'block', '🌀 다시하기', bi)
     REFRESH = tem.QReply('🌀 새로고침', 'block', '🌀 새로고침', bi)
 
-    if bn == '급식':
+    if bn == '급식' or bn == '생일 급식':
         if not await permission(user_key):
             return tem.data(d=WEAK, t='사용 불가')
         mt = params['mealtime']
@@ -77,7 +77,7 @@ async def skill(
         title = '📢 서일중학교 공지'
         if not await permission(user_key):
             return tem.simpleText(f'{title}\n\n{WEAK}', [RETRY])
-        b = [tem.KList(*t[:2], '', {'web': t[2]}) \
+        b = [tem.ListItem(*t[:2], '', {'web': t[2]}) \
              for t in await school_notice()]
         return tem.carousel(
             'listCard',
@@ -88,7 +88,7 @@ async def skill(
     elif bn == 'QR코드 생성':
         if not await permission(user_key):
             return tem.simpleText(f'🏁 QR코드 생성\n\n{WEAK}', [RETRY])
-        return tem.image(
+        return tem.simpleImage(
             f'https://chart.apis.google.com/chart?cht=qr&chs=547x547&chl={params["qrmsg"]}'
             'QR코드를 생성하는데 문제가 발생했어요.',
             [RETRY]
@@ -349,7 +349,7 @@ async def game(
                 con.commit()
                 res = [('정답', userdata[1]), ('횟수', str(userdata[2]))]
             return tem.listCard(
-                TITLE, [tem.KList(*t) for t in res], [RETRY]
+                TITLE, [tem.ListItem(*t) for t in res], [RETRY]
             )
 
         elif len(set(input_)) != 4 or not input_.isdigit():
@@ -373,7 +373,7 @@ async def game(
                    ('결과', ', '.join(msg, count)),
                    ('횟수', str(count))]
             return tem.listCard(
-                TITLE, [tem.KList(*t) for t in res], [RETRY]
+                TITLE, [tem.ListItem(*t) for t in res], [RETRY]
             )
 
     else:
