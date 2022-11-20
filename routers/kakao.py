@@ -68,7 +68,9 @@ async def skill(
     elif bn == '공지':
         cur.execute("SELECT content FROM bot WHERE field='notice';")
         return tem.simpleText(
-            f'📢 공지\n\n{cur.fetchone()[0]}', [REFRESH], tem.Button('상담직원 연결', 'operator')
+            f'📢 공지\n\n{cur.fetchone()[0]}',
+            [REFRESH],
+            [tem.Button('상담직원 연결', 'operator')]
         )
 
     elif bn == '학교 공지 목록':
