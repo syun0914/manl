@@ -44,7 +44,7 @@ async def skill(
         image_url = 'https://rawcdn.githack.com/syun0914/manl_thumbnail/main/winter_2022/2022_winter_1_compressed.png?token=GHSAT0AAAAAAB3NMHLBOFCOC6BJOKZAEAFYY5PZ53A'
         if not await permission(user_key):
             return tem.basicCard(image_url, '사용 불가', WEAK)
-        d = await meal(j.loads(params['date'])['value'], params['mealtime'])
+        d = await meal(j.loads(params['date'])['date'], params['mealtime'])
         return tem.basicCard(
             image_url, d['title'], d['meal'],
             q_replies=[RETRY], forwardable=True
