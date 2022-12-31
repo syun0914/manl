@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends
 from random import sample
 from sqlite3 import IntegrityError
 from time import time
+from urllib.parse import quote
 
 from databases.database import con, cur, permission
 from fastapi.responses import ORJSONResponse
@@ -91,7 +92,7 @@ async def skill(
         if not await permission(user_key):
             return tem.simpleText(f'🏁 QR코드 생성\n\n{WEAK}', [RETRY])
         return tem.simpleImage(
-            f'https://chart.apis.google.com/chart?cht=qr&chs=547x547&chl={params["qr_msg"]}'
+            f'https://chart.apis.google.com/chart?cht=qr&chs=547x547&chl={quote(params["qr_msg"])}'
             'QR코드를 생성하는데 문제가 발생했어요.',
             [RETRY]
         )
