@@ -1,7 +1,7 @@
 from config import DB_SETTING
-from sqlite3 import connect
+from pymysql import connect
 
-con = connect('databases/kakao.db', **DB_SETTING)
+con = connect(**DB_SETTING)
 cur = con.cursor()
 
 
@@ -15,7 +15,7 @@ async def permission(user_key: str, r: int = 1) -> bool:
         user_key: 사용자 키
         r: 최소 권한
     '''
-    cur.execute('SELECT level FROM users WHERE user_key=?;', (user_key,))
+    cur.execute('SELECT level FROM users WHERE user_key=%s;', (user_key,))
     f = cur.fetchone()
     if not f:
         return r <= 0

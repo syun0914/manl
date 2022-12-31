@@ -14,7 +14,7 @@ from fastapi.responses import ORJSONResponse
 from fastapi.security.api_key import APIKey
 from internal.util import *
 
-router = APIRouter('/api/xllent')
+router = APIRouter('/api/v1')
 
 
 @router.post('/skill', response_class=ORJSONResponse)
@@ -44,23 +44,20 @@ async def skill(
         if not await permission(user_key):
             return tem.data(d=WEAK, t='사용 불가')
         mt = params['mealtime']
-        d = await meal(
-            j.loads(params['date'])['value'],
-            1 if mt == '조식' else (2 if mt == '중식' else 3)
+        d = await meal(j.loads(params['date'])['value'], mt)
+        return tem.basicCard(
+            'https://rawcdn.githack.com/syun0914/manl_thumbnail/main/winter_2022/2022_winter_1_compressed.png?token=GHSAT0AAAAAAB3NMHLBOFCOC6BJOKZAEAFYY5PZ53A',
+            d['title'], d['meal'], q_replies=[RETRY], forwardable=True
         )
-        return tem.data(**d)
-
-    elif bn == '코로나19 현황':
-        if not await permission(user_key):
-            return tem.data(d=WEAK, t='사용 불가')
-        d = await covid(params['area'], True)
-        return tem.data(**d)
 
     elif bn == '시간표':
         if not await permission(user_key):
             return tem.data(d=WEAK, t='사용 불가')
         d = await timetable('3-1', params['day'])
-        return tem.data(**d)
+        return tem.basicCard(
+            'https://rawcdn.githack.com/syun0914/manl_thumbnail/main/winter_2022/2022_winter_2_compressed.png?token=GHSAT0AAAAAAB3NMHLAP4SS6VYVDQ2PU2K4Y5P2DZQ',
+            d['title'], d['timetable'], q_replies=[RETRY], forwardable=True
+        )
 
     elif bn == '사용자 키':
         return tem.simpleText(user_key)

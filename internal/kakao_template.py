@@ -125,7 +125,7 @@ def t_filter(td: dict, k_type: str) -> dict:
 def data(**kwargs) -> dict:
     '''카카오 챗봇 템플릿 (데이터)
     
-    주어진 인자들을 data 챗봇 템플릿으로 변환합니다.
+    주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
     키워드 인자:
         kwargs: 데이터
@@ -141,7 +141,7 @@ def simpleImage(
 ) -> dict:
     '''카카오 챗봇 템플릿 (이미지)
 
-    주어진 인자들을 simpleImage 챗봇 템플릿으로 변환합니다.
+    주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
     인자:
         url: 이미지 URL
@@ -174,7 +174,7 @@ def simpleText(
 ) -> dict:
     '''카카오 챗봇 템플릿 (텍스트)
 
-    주어진 인자들을 simpleText 챗봇 템플릿으로 변환합니다.
+    주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
     인자:
         text: 텍스트
@@ -207,7 +207,7 @@ def listCard(
 ) -> dict:
     '''카카오 챗봇 템플릿 (리스트 카드)
 
-    주어진 인자들을 listCard 챗봇 템플릿으로 변환합니다.
+    주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
     인자:
         title: 제목
@@ -238,7 +238,7 @@ def carousel(
 ) -> dict:
     '''카카오 챗봇 템플릿 (캐로셀)
 
-    주어진 인자들을 carousel 챗봇 템플릿으로 변환합니다.
+    주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
     인자:
         k_type: 카카오 챗봇 템플릿 타입
@@ -260,3 +260,35 @@ def carousel(
         }
     }
     return t_filter(a, 'carousel')
+
+
+def basicCard(
+    image_url: str,
+    title: str | None = None,
+    description: str | None = None,
+    buttons: list[Button] | None = None,
+    q_replies: list[QReply] | None = None,
+    forwardable: bool = False
+) -> dict:
+    '''카카오 챗봇 템플릿 (카드)
+
+    주어진 인자들을 챗봇 템플릿으로 변환합니다.
+
+    인자:
+    '''
+    a = {
+        'version': VERSION,
+        'template': {
+            'outputs': [{'listCard': {
+                'title': title,
+                'description': description,
+                'thumbnail': {'imageUrl': image_url},
+                'forwardable': forwardable,
+                'buttons': buttons and [del_empty(asdict(b)) for b in buttons]
+            }}],
+            'quickReplies': (
+                q_replies and [del_empty(asdict(q)) for q in q_replies]
+            )
+        }
+    }
+    return t_filter(a, 'listCard')
