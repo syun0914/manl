@@ -5,9 +5,9 @@ VERSION = '2.0'
 
 @dataclass
 class QReply:
-    '''카카오 챗봇 바로가기 응답
+    '''바로가기 응답
 
-    카카오 챗봇에서 바로가기로 제공되는 응답입니다.
+    챗봇에서 바로가기로 제공되는 응답입니다.
 
     속성:
         label: 사용자에게 노출될 응답 표시
@@ -24,10 +24,26 @@ class QReply:
 
 
 @dataclass
-class ListItem:
-    '''카카오 챗봇 리스트 아이템
+class Link:
+    '''링크
 
-    카카오 리스트 카드 템플릿에 들어갈 아이템입니다.
+    챗봇에서 링크로 들어갑니다.
+
+    속성:
+        pc: PC에서 보일 링크
+        mobile: 모바일에서 보일 링크
+        web: 웹에서 보일 링크
+    '''
+    web: str = None
+    pc: str = None
+    mobile: str = None
+
+
+@dataclass
+class ListItem:
+    '''챗봇 리스트 아이템
+
+    리스트 카드 템플릿에 들어갈 아이템입니다.
 
     속성:
         title: 제목
@@ -47,19 +63,23 @@ class ListItem:
     '''
     title: str
     description: str = ''
+    link: Link = None
     imageUrl: str = ''
-    link: dict = field(default_factory=dict)
     action: str = ''
     blockId: str = ''
     messageText: str = ''
     extra: str = None
 
+    def __post_init__(self):
+        link = self.link
+        self.link = link and del_empty(asdict(link))
+
 
 @dataclass
 class Button:
-    '''카카오 챗봇 버튼
+    '''버튼
 
-    카카오 챗봇에서 버튼으로 들어갑니다.
+    챗봇에서 버튼으로 들어갑니다.
 
     속성:
         label: 적히는 문구
@@ -86,6 +106,30 @@ class Button:
     extra: str = None
 
 
+@dataclass
+class Thumbnail:
+    '''썸네일
+
+    챗봇에서 썸네일로 들어갑니다.
+
+    속성:
+        imageUrl: 이미지 URL
+        link: 링크
+        fixedRatio: 이미지 비율
+        width: 가로 크기
+        height: 세로 크기
+    '''
+    imageUrl: str
+    link: Link = None
+    fixedRatio: bool = None
+    width: int = None
+    height: int = None
+
+    def __post_init__(self):
+        link = self.link
+        self.link = link and del_empty(asdict(link))
+
+
 def del_empty(object: dict | list) -> dict | list:
     '''{object}에서 빈 내용 지우기
     
@@ -106,13 +150,13 @@ def del_empty(object: dict | list) -> dict | list:
         raise TypeError('object는 딕셔너리나 리스트여야 합니다.')
 
 def t_filter(td: dict, k_type: str) -> dict:
-    '''카카오 챗봇 템플릿에서 빈 내용 지우기
+    '''챗봇 템플릿에서 빈 내용 지우기
     
     카카오 챗봇 템플릿에서 빈 내용을 지우고 반환합니다.
 
     인자:
-        td: 카카오 챗봇 템플릿
-        k_type: 카카오 챗봇 템플릿의 타입
+        td: 챗봇 템플릿
+        k_type: 챗봇 템플릿의 타입
     '''
     qReplies = td['template'].get('quickReplies')
     home = td['template']['outputs'][0][k_type]
@@ -123,7 +167,7 @@ def t_filter(td: dict, k_type: str) -> dict:
 
 
 def data(**kwargs) -> dict:
-    '''카카오 챗봇 템플릿 (데이터)
+    '''챗봇 템플릿 (데이터)
     
     주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
@@ -139,7 +183,7 @@ def simpleImage(
     q_replies: list[QReply] | None = None,
     buttons: list[Button] | None = None
 ) -> dict:
-    '''카카오 챗봇 템플릿 (이미지)
+    '''챗봇 템플릿 (이미지)
 
     주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
@@ -172,7 +216,7 @@ def simpleText(
     buttons: list[Button] | None = None,
     forwardable: bool = False
 ) -> dict:
-    '''카카오 챗봇 템플릿 (텍스트)
+    '''챗봇 템플릿 (텍스트)
 
     주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
@@ -205,7 +249,7 @@ def listCard(
     buttons: list[Button] | None = None,
     forwardable: bool = False
 ) -> dict:
-    '''카카오 챗봇 템플릿 (리스트 카드)
+    '''챗봇 템플릿 (리스트 카드)
 
     주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
@@ -236,7 +280,7 @@ def listCard(
 def carousel(
     k_type: str, templates: list[dict], q_replies: list[QReply] | None = None
 ) -> dict:
-    '''카카오 챗봇 템플릿 (캐로셀)
+    '''챗봇 템플릿 (캐로셀)
 
     주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
@@ -263,18 +307,24 @@ def carousel(
 
 
 def basicCard(
-    image_url: str,
+    thumbnail: Thumbnail,
     title: str | None = None,
     description: str | None = None,
     buttons: list[Button] | None = None,
     q_replies: list[QReply] | None = None,
     forwardable: bool = False
 ) -> dict:
-    '''카카오 챗봇 템플릿 (카드)
+    '''챗봇 템플릿 (카드)
 
     주어진 인자들을 챗봇 템플릿으로 변환합니다.
 
     인자:
+        image_url: 이미지 URL
+        title: 제목
+        description: 설명
+        buttons: 버튼
+        q_replies: 바로가기 응답
+        forwardable: 전달 가능 여부
     '''
     a = {
         'version': VERSION,
@@ -282,7 +332,7 @@ def basicCard(
             'outputs': [{'basicCard': {
                 'title': title,
                 'description': description,
-                'thumbnail': {'imageUrl': image_url, 'width': 800, 'height': 800},
+                'thumbnail': thumbnail and del_empty(asdict(thumbnail)),
                 'forwardable': forwardable,
                 'buttons': buttons and [del_empty(asdict(b)) for b in buttons]
             }}],
