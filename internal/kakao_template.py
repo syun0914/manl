@@ -30,9 +30,9 @@ class Link:
     챗봇에서 링크로 들어갑니다.
 
     속성:
+        web: 웹에서 보일 링크
         pc: PC에서 보일 링크
         mobile: 모바일에서 보일 링크
-        web: 웹에서 보일 링크
     '''
     web: str = None
     pc: str = None

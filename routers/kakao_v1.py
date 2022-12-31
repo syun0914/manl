@@ -43,7 +43,7 @@ async def skill(
     if bn == '급식' or bn == '생일 급식':
         thumbnail = tem.Thumbnail(
             'https://rawcdn.githack.com/syun0914/manl_thumbnail/f19f16a42ec0b6a0ac512119d2b90a3c51d0674b/winter_2022/2022_winter_1_compressed.png',
-            fixedRatio=True, width=2560, height=2560)
+            tem.Link('http://112.186.146.81:4082/st'), True, 2560, 2560)
         if not await permission(user_key):
             return tem.basicCard(thumbnail, '사용 불가', WEAK)
         d = await meal(j.loads(params['date'])['date'], params['meal_time'])
@@ -55,7 +55,7 @@ async def skill(
     elif bn == '시간표':
         thumbnail = tem.Thumbnail(
             'https://rawcdn.githack.com/syun0914/manl_thumbnail/f19f16a42ec0b6a0ac512119d2b90a3c51d0674b/winter_2022/2022_winter_2_compressed.png',
-            fixedRatio=True, width=2560, height=2560)
+            tem.Link('http://112.186.146.81:4082/st'), True, 2560, 2560)
         if not await permission(user_key):
             return tem.basicCard(thumbnail, '사용 불가', WEAK)
         d = await timetable('3-1', params['day'])
