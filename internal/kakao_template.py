@@ -279,7 +279,7 @@ def basicCard(
     a = {
         'version': VERSION,
         'template': {
-            'outputs': [{'listCard': {
+            'outputs': [{'basicCard': {
                 'title': title,
                 'description': description,
                 'thumbnail': {'imageUrl': image_url},
@@ -291,4 +291,4 @@ def basicCard(
             )
         }
     }
-    return t_filter(a, 'listCard')
+    return t_filter(a, 'basicCard')
