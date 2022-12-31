@@ -27,25 +27,25 @@ AREA_LIST = [
 DAY_NAME = {'월요일': 0, '화요일': 1, '수요일': 2, '목요일': 3, '금요일': 4}
 
 async def meal(
-    date: str, mealtime: int, nutrient: bool = False
+    date: str, meal_time: str, nutrient: bool = False
 ) -> dict[str, str]:
     '''급식 정보 불러오기
 
     급식 정보를 불러옵니다.
 
     인자:
-        date: 날짜 8자(예: 20200608)
-        mealtime: 1(아침) 또는 2(점심) 또는 3(저녁)
+        date: 날짜 8자리(예: 20200608)
+        mealtime: 아침, 점심, 저녁
         nutrient: True(영양소 정보) 또는 False(메뉴)
     '''
     dt = str(date).replace('-', '')
     p = OLD_P if int(dt) < 20220415 else NEW_P
     n = 'NTR_INFO' if nutrient else 'DDISH_NM'
-    sMT = '아침' if mealtime == 1 else ('점심' if mealtime == 2 else '저녁')
+    mt = '1' if meal_time == '아침' else ('2' if meal_time == '점심' else '3')
     qData = {
         'ATPT_OFCDC_SC_CODE': 'N10', 'SD_SCHUL_CODE': '8140209',
         'key': 'c3e5ba8a996c4ca19763f7120863f362',
-        'TYPE': 'JSON', 'MMEAL_SC_CODE': str(mealtime), 'MLSV_YMD': dt
+        'TYPE': 'JSON', 'MMEAL_SC_CODE': mt, 'MLSV_YMD': dt
     }
     try:
         if dt == '20200608':
@@ -68,7 +68,7 @@ async def meal(
         else:
             d = '급식을 찾을 수 없습니다.'
     return {
-        'title': f'🍔 {dt[:4]}년 {int(dt[4:6])}월 {int(dt[6:])}일, {sMT}',
+        'title': f'🍔 {dt[:4]}년 {int(dt[4:6])}월 {int(dt[6:])}일, {meal_time}',
         'meal': d
     }
 
