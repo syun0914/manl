@@ -41,7 +41,7 @@ async def skill(
     REFRESH = tem.QReply('🌀 새로고침', 'block', '🌀 새로고침', bi)
 
     if bn == '급식' or bn == '생일 급식':
-        image_url = 'https://rawcdn.githack.com/syun0914/manl_thumbnail/main/winter_2022/2022_winter_1_compressed.png?token=GHSAT0AAAAAAB3NMHLBOFCOC6BJOKZAEAFYY5PZ53A'
+        image_url = 'https://rawcdn.githack.com/syun0914/manl_thumbnail/main/winter_2022/2022_winter_1_compressed.png'
         if not await permission(user_key):
             return tem.basicCard(image_url, '사용 불가', WEAK)
         d = await meal(j.loads(params['date'])['date'], params['meal_time'])
@@ -51,7 +51,7 @@ async def skill(
         )
 
     elif bn == '시간표':
-        image_url = 'https://rawcdn.githack.com/syun0914/manl_thumbnail/main/winter_2022/2022_winter_2_compressed.png?token=GHSAT0AAAAAAB3NMHLAP4SS6VYVDQ2PU2K4Y5P2DZQ'
+        image_url = 'https://rawcdn.githack.com/syun0914/manl_thumbnail/main/winter_2022/2022_winter_2_compressed.png'
         if not await permission(user_key):
             return tem.basicCard(image_url, '사용 불가', WEAK)
         d = await timetable('3-1', params['day'])
