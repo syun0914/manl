@@ -14,7 +14,7 @@ from fastapi.responses import ORJSONResponse
 from fastapi.security.api_key import APIKey
 from internal.util import *
 
-router = APIRouter('/api/v1')
+router = APIRouter(prefix='/api/v1')
 
 
 @router.post('/skill', response_class=ORJSONResponse)
