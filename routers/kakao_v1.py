@@ -67,7 +67,7 @@ async def skill(
     elif bn == '사용자 키':
         return tem.simpleText(user_key)
     
-    elif bn == '공지':
+    elif bn == '공지사항':
         cur.execute("SELECT content FROM bot WHERE field='notice';")
         return tem.simpleText(
             f'📢 공지\n\n{cur.fetchone()[0]}',
@@ -75,8 +75,8 @@ async def skill(
             [tem.Button('상담직원 연결', 'operator')]
         )
 
-    elif bn == '학교 공지 목록':
-        title = '📢 서일중학교 공지'
+    elif bn == '학교 공지사항 목록':
+        title = '📢 서일중학교 공지사항'
         if not await permission(user_key):
             return tem.simpleText(f'{title}\n\n{WEAK}', [RETRY])
         b = [tem.ListItem(*t[:2], '', {'web': t[2]}) \
