@@ -282,7 +282,7 @@ def basicCard(
             'outputs': [{'basicCard': {
                 'title': title,
                 'description': description,
-                'thumbnail': {'imageUrl': image_url},
+                'thumbnail': {'imageUrl': image_url, 'width': 800, 'height': 800},
                 'forwardable': forwardable,
                 'buttons': buttons and [del_empty(asdict(b)) for b in buttons]
             }}],
