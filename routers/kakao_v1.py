@@ -2,7 +2,6 @@ import internal.kakao_template as tem
 import orjson as j
 import yaml as y
 
-from comcigan import AsyncSchool
 from dependencies import get_api_key, kakao_bot
 from fastapi import APIRouter, Depends
 from random import sample
@@ -50,7 +49,7 @@ async def skill(
         d = await meal(j.loads(params['date'])['date'], params['meal_time'])
         return tem.basicCard(
             thumbnail, d['title'], d['meal'],
-            q_replies=[RETRY], forwardable=True
+            q_replies=[RETRY], forwardable=await permission(user_key, 2)
         )
 
     elif bn == '시간표':
