@@ -24,13 +24,7 @@ AREA_LIST = [
     '충남', '충북', '강원', '경기', '세종', '울산',
     '대전', '광주', '인천', '대구', '부산', '서울'
 ]
-DAY_NAME = {
-    'monday': 0,
-    'tuesday': 1,
-    'wednesday': 2,
-    'thursday': 3,
-    'friday': 4
-}
+DAY_NAME = {'월요일': 0, '화요일': 1, '수요일': 2, '목요일': 3, '금요일': 4}
 
 async def meal(
     date: str, mealtime: int, nutrient: bool = False
