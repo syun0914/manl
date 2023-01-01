@@ -138,6 +138,9 @@ async def admin(
             res = e
         return tem.simpleText(str(res)[:4010])
 
+    elif bn == '사용자 키':
+        return tem.simpleText(user_key)
+
     elif bn == '공지 수정':
         if not await permission(user_key, 3):
             return tem.simpleText(WEAK)

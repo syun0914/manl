@@ -32,7 +32,7 @@ async def permission_admin(user_key: str, r: int = 1) -> bool:
         user_key: 사용자 키
         r: 최소 권한
     '''
-    cur.execute('SELECT level FROM admin WHERE user_key=%s;', (user_key,))
+    cur.execute('SELECT level FROM admins WHERE user_key=%s;', (user_key,))
     f = cur.fetchone()
     if not f:
         return r <= 0
