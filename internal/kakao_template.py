@@ -128,6 +128,20 @@ class Thumbnail:
         self.link = link and del_empty(asdict(link))
 
 
+@dataclass
+class Context:
+    '''컨텍스트
+
+    속성:
+        name: 이름
+        lifeSpan: 지속 시간
+        params: 데이터
+    '''
+    name: str
+    lifeSpan: int
+    params: dict = None
+
+
 def del_empty(object: dict | list) -> dict | list:
     '''{object}에서 빈 내용 지우기
     
@@ -147,6 +161,7 @@ def del_empty(object: dict | list) -> dict | list:
     else:
         raise TypeError('object는 딕셔너리나 리스트여야 합니다.')
 
+
 def t_filter(td: dict, k_type: str) -> dict:
     '''챗봇 템플릿에서 빈 내용 지우기
     
@@ -164,7 +179,7 @@ def t_filter(td: dict, k_type: str) -> dict:
     return td
 
 
-def data(**kwargs) -> dict:
+def data(contexts: list[Context] | None = None, **kwargs) -> dict:
     '''챗봇 템플릿 (데이터)
     
     주어진 인자들을 챗봇 템플릿으로 변환합니다.
@@ -172,14 +187,21 @@ def data(**kwargs) -> dict:
     키워드 인자:
         kwargs: 데이터
     '''
-    return {'version': VERSION, 'data': del_empty(kwargs)}
+    return {
+        'version': VERSION,
+        'data': del_empty(kwargs),
+        'context': del_empty({
+            'values': contexts and [del_empty(asdict(c)) for c in contexts]
+        })
+    }
 
 
 def simpleImage(
     url: str,
     alt_text: str | None = None,
     q_replies: list[QReply] | None = None,
-    buttons: list[Button] | None = None
+    buttons: list[Button] | None = None,
+    contexts: list[Context] | None = None
 ) -> dict:
     '''챗봇 템플릿 (이미지)
 
@@ -202,7 +224,10 @@ def simpleImage(
             'quickReplies': (
                 q_replies and [del_empty(asdict(q)) for q in q_replies]
             )
-        }
+        },
+        'context': del_empty({
+            'values': contexts and [del_empty(asdict(c)) for c in contexts]
+        })
     }
     
     return t_filter(a, 'simpleImage')
@@ -212,7 +237,8 @@ def simpleText(
     text: str,
     q_replies: list[QReply] | None = None,
     buttons: list[Button] | None = None,
-    forwardable: bool = False
+    forwardable: bool = False,
+    contexts: list[Context] | None = None
 ) -> dict:
     '''챗봇 템플릿 (텍스트)
 
@@ -235,7 +261,10 @@ def simpleText(
             'quickReplies': (
                 q_replies and [del_empty(asdict(q)) for q in q_replies]
             )
-        }
+        },
+        'context': del_empty({
+            'values': contexts and [del_empty(asdict(c)) for c in contexts]
+        })
     }
     return t_filter(a, 'simpleText')
 
@@ -245,7 +274,8 @@ def listCard(
     list_items: list[ListItem],
     q_replies: list[QReply] | None = None,
     buttons: list[Button] | None = None,
-    forwardable: bool = False
+    forwardable: bool = False,
+    contexts: list[Context] | None = None
 ) -> dict:
     '''챗봇 템플릿 (리스트 카드)
 
@@ -270,13 +300,19 @@ def listCard(
             'quickReplies': (
                 q_replies and [del_empty(asdict(q)) for q in q_replies]
             )
-        }
+        },
+        'context': del_empty({
+            'values': contexts and [del_empty(asdict(c)) for c in contexts]
+        })
     }
     return t_filter(a, 'listCard')
 
 
 def carousel(
-    k_type: str, templates: list[dict], q_replies: list[QReply] | None = None
+    k_type: str,
+    templates: list[dict],
+    q_replies: list[QReply] | None = None,
+    contexts: list[Context] | None = None
 ) -> dict:
     '''챗봇 템플릿 (캐로셀)
 
@@ -299,7 +335,10 @@ def carousel(
             'quickReplies': (
                 q_replies and [del_empty(asdict(q)) for q in q_replies]
             )
-        }
+        },
+        'context': del_empty({
+            'values': contexts and [del_empty(asdict(c)) for c in contexts]
+        })
     }
     return t_filter(a, 'carousel')
 
@@ -310,7 +349,8 @@ def basicCard(
     description: str | None = None,
     buttons: list[Button] | None = None,
     q_replies: list[QReply] | None = None,
-    forwardable: bool = False
+    forwardable: bool = False,
+    contexts: list[Context] | None = None
 ) -> dict:
     '''챗봇 템플릿 (카드)
 
@@ -337,6 +377,9 @@ def basicCard(
             'quickReplies': (
                 q_replies and [del_empty(asdict(q)) for q in q_replies]
             )
-        }
+        },
+        'context': del_empty({
+            'values': contexts and [del_empty(asdict(c)) for c in contexts]
+        })
     }
     return t_filter(a, 'basicCard')

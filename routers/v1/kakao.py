@@ -183,21 +183,6 @@ async def admin(
             return tem.simpleText(
                 f'{TITLE}\n\n사용자 제거에 {res}했어요.', [RETRY]
             )
-        elif menu == '조회' and len(query) > 0:
-            try:
-                cur.execute(f'''
-                    SELECT * FROM users WHERE
-                    {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}
-                ''')
-                userdata = cur.fetchone()
-                res = [
-                    ('사용자 키', userdata[0]),
-                    ('이름', userdata[1]), ('학번', userdata[2]),
-                    ('등급·허가 상태', userdata[3])
-                ]
-                return tem.listCard(TITLE, [tem.ListItem(*t) for t in res], [RETRY])
-            except BaseException as e:
-                return tem.simpleText(str(e))#f'{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
         elif menu == '등급' and len(query) > 1:
             try:
                 cur.execute(
@@ -251,6 +236,41 @@ async def admin(
             res = '실패'
         return tem.simpleText(f'{TITLE}\n\n사용자 추가에 {res}했어요.', [RETRY])
 
+    elif bn == '사용자 조회':
+        TITLE = '👨🏻‍💼 사용자 조회'
+        if not await permission_admin(user_key, 1):
+            return tem.simpleText(f'{TITLE}\n\n{WEAK}')
+        try:
+            query: dict[str, str] = y.load(
+                stream=params['query'].replace(', ', '\n').replace(',', '\n'),
+                Loader=y.FullLoader
+            )
+            query = tem.del_empty({
+                'user_key': query.pop('key', None),
+                'name': query.get('name'),
+                'student_id': query.pop('key', None),
+                'level': query.pop('lvl', None),
+                'uuid': query.pop('uuid', None)
+            })
+        except:
+            return tem.simpleText(
+                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.',
+                [RETRY]
+            )
+        try:
+            cur.execute(f'''
+                SELECT * FROM `users` WHERE
+                {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}
+            ''')
+            list_items = ([
+                tem.ListItem('사용자 키', u[0]), tem.ListItem('이름', u[1]),
+                tem.ListItem('학번', u[2]), tem.ListItem('등급·허가 상태', u[3]),
+                tem.ListItem('UUID', u[4])
+            ] for u in cur.fetchmany(5))
+            return tem.carousel('listCard', [tem.listCard('사용자 조회 결과', l) for l in list_items])
+        except:
+            return tem.simpleText('{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
+    
     elif bn == '관리자 목록':
         TITLE = '👨🏻‍💼 관리자 목록(클래식)'
         SEP = '\n----------\n> '
