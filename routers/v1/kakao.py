@@ -8,8 +8,9 @@ from random import sample
 from sqlite3 import IntegrityError
 from time import time
 from urllib.parse import quote
+from uuid import uuid4
 
-from databases.database import con, cur, permission
+from databases.database import con, cur, permission, permission_admin
 from fastapi.responses import ORJSONResponse
 from fastapi.security.api_key import APIKey
 from internal.util import *
@@ -166,22 +167,7 @@ async def admin(
                 [RETRY]
             )
         
-        if menu == '추가' and len(query) == 4:
-            try:
-                cur.execute(
-                    'INSERT OR IGNORE INTO `users` VALUES (?, ?, ?, ?)',
-                    (query['user_key'], query['name'],
-                     query['student_ID'], query['level'])
-                )
-                res = '성공'
-                con.commit()
-            except:
-                res = '실패'
-
-            return tem.simpleText(
-                f'{TITLE}\n\n사용자 추가에 {res}했어요.', [RETRY]
-            )
-        elif menu == '제거' and len(query) > 0:
+        if menu == '제거' and len(query) > 0:
             try:
                 cur.execute(f'''
                     DELETE FROM `users` WHERE
@@ -231,6 +217,36 @@ async def admin(
                 f'{TITLE}\n\n올바르지 않은 행동이에요. 쉼표로 구분한 YAML로 보냈는지 확인해주세요.',
                 [RETRY]
             )
+    
+    elif bn == '사용자 등록':
+        TITLE = '👨🏻‍💼 사용자 등록'
+        if not await permission_admin(user_key, 2):
+            return tem.simpleText(f'{TITLE}\n\n{WEAK}')
+
+        try:
+            query: dict[str, str] = y.load(
+                stream=params['query'].replace(', ', '\n').replace(',', '\n'),
+                Loader=y.FullLoader
+            )
+        except:
+            return tem.simpleText(
+                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.',
+                [RETRY]
+            )
+        
+        try:
+            cur.execute(
+                '''INSERT OR IGNORE INTO `users`
+                (user_key, name, student_id, level, uuid)
+                VALUES (?, ?, ?, ?)''',
+                (query['key'], query['name'], query['sid'],
+                 query['lvl'], uuid4())
+            )
+            res = '성공'
+            con.commit()
+        except:
+            res = '실패'
+        return tem.simpleText(f'{TITLE}\n\n사용자 추가에 {res}했어요.', [RETRY])
 
     elif bn == '관리자 목록':
         TITLE = '👨🏻‍💼 관리자 목록(클래식)'
