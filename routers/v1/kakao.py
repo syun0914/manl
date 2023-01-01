@@ -152,59 +152,6 @@ async def admin(
             res = '오류가 발생해 실패'
         return tem.simpleText(f'📢 공지 수정에 {res}했어요.', [RETRY])
     
-    elif bn == '사용자 관리':
-        TITLE = '👨🏻‍💼 사용자 관리'
-        if not await permission(user_key, 4):
-            return tem.simpleText(f'{TITLE}\n\n{WEAK}')
-
-        menu: str = params['menu']
-        try:
-            query: dict[str, str] = y.load(
-                stream=params['query'].replace(', ', '\n').replace(',', '\n'),
-                Loader=y.FullLoader
-            )
-        except:
-            return tem.simpleText(
-                f'{TITLE}\n\n{query}'#올바르지 않은 행동이에요. 쉼표로 구분한 YAML로 보냈는지 확인해주세요.',
-                [RETRY]
-            )
-        
-        if menu == '제거' and len(query) > 0:
-            try:
-                cur.execute(f'''
-                    DELETE FROM `users` WHERE
-                    {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}
-                ''')
-                res = '성공'
-                con.commit()
-            except:
-                res = '실패'
-            return tem.simpleText(
-                f'{TITLE}\n\n사용자 제거에 {res}했어요.', [RETRY]
-            )
-        elif menu == '등급' and len(query) > 1:
-            try:
-                cur.execute(
-                    f'''UPDATE users SET level=? WHERE {
-                    	' AND '.join(
-                        f"{k} LIKE '{v}'" for k, v in query.items()
-                        if k != 'level')
-                    }''',
-                    (query['level'],)
-                )
-                res = '성공'
-                con.commit()
-            except:
-                res = '실패'
-            return tem.simpleText(
-                f'{TITLE}\n\n사용자 등급·허가 상태 변경에 {res}했어요.', [RETRY]
-            )
-        else:
-            return tem.simpleText(
-                f'{TITLE}\n\n올바르지 않은 행동이에요. 쉼표로 구분한 YAML로 보냈는지 확인해주세요.',
-                [RETRY]
-            )
-    
     elif bn == '사용자 등록':
         TITLE = '👨🏻‍💼 사용자 등록'
         if not await permission_admin(user_key, 2):
@@ -224,10 +171,10 @@ async def admin(
         try:
             cur.execute(
                 '''INSERT IGNORE INTO `users`
-                (`user_key`, `name`, `student_id`, `level`, `uuid`)
+                (`user_key`, `name`, `student_id`, `level`, `phone`)
                 VALUES (%s, %s, %s, %s, %s)''',
                 (query['key'], query['name'], str(query['sid']),
-                 query['lvl'], str(uuid4()))
+                 query['lvl'], query['phone'])
             )
             res = '성공'
             con.commit()
@@ -249,7 +196,7 @@ async def admin(
                 'name': query.get('name'),
                 'student_id': query.pop('key', None),
                 'level': query.pop('lvl', None),
-                'uuid': query.pop('uuid', None)
+                'phone': query.get('phone')
             })
         except:
             return tem.simpleText(
@@ -259,13 +206,13 @@ async def admin(
         try:
             cur.execute(f'''
                 SELECT * FROM `users` WHERE
-                {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}
-            ''')
+                {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}'''
+            )
             u = cur.fetchone()
             list_items = [
                 tem.ListItem('사용자 키', u[0]), tem.ListItem('이름', u[1]),
                 tem.ListItem('학번', u[2]), tem.ListItem('권한 상태', u[3]),
-                tem.ListItem('UUID', u[4]), tem.ListItem('전화번호', u[5])
+                tem.ListItem('전화번호', u[4])
             ]
             return tem.listCard(
                 '사용자 정보', list_items,
@@ -283,6 +230,77 @@ async def admin(
             )
         except:
             return tem.simpleText('{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
+    
+    if bn == '사용자 제거':
+        TITLE = '👨🏻‍💼 사용자 제거'
+        if not await permission_admin(user_key, 2):
+            return tem.simpleText(f'{TITLE}\n\n{WEAK}')
+        try:
+            query: dict[str, str] = y.load(
+                stream=params['query'].replace(', ', '\n').replace(',', '\n'),
+                Loader=y.FullLoader
+            )
+            query = tem.del_empty({
+                'user_key': query.pop('key', None),
+                'name': query.get('name'),
+                'student_id': query.pop('key', None),
+                'level': query.pop('lvl', None),
+                'phone': query.get('phone')
+            })
+        except:
+            return tem.simpleText(
+                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.',
+                [RETRY]
+            )
+        try:
+            cur.execute(
+                f'''DELETE FROM `users` WHERE
+                {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}'''
+            )
+            res = '성공'
+            con.commit()
+        except:
+            res = '실패'
+        return tem.simpleText(
+            f'{TITLE}\n\n사용자 제거에 {res}했어요.', [RETRY]
+        )
+
+    elif bn == '사용자 권한 상태 변경':
+        TITLE = '👨🏻‍💼 사용자 권한 상태 변경'
+        if not await permission_admin(user_key, 2):
+            return tem.simpleText(f'{TITLE}\n\n{WEAK}')
+        try:
+            query: dict[str, str] = y.load(
+                stream=params['query'].replace(', ', '\n').replace(',', '\n'),
+                Loader=y.FullLoader
+            )
+            query = tem.del_empty({
+                'user_key': query.pop('key', None),
+                'name': query.get('name'),
+                'student_id': query.pop('key', None),
+                'level': query.pop('lvl', None),
+                'phone': query.get('phone')
+            })
+        except:
+            return tem.simpleText(
+                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.',
+                [RETRY]
+            )
+        try:
+            cur.execute(
+                f'''UPDATE users SET level=%s WHERE
+                {' AND '.join(
+                    f"{k} LIKE '{v}'" for k, v in query.items()
+                )}''',
+                (int(params['new_level']),)
+            )
+            res = '성공'
+            con.commit()
+        except:
+            res = '실패'
+        return tem.simpleText(
+            f'{TITLE}\n\n사용자 권한 상태 변경에 {res}했어요.', [RETRY]
+        )
     
     elif bn == '관리자 목록':
         TITLE = '👨🏻‍💼 관리자 목록(클래식)'
