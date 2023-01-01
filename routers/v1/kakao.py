@@ -240,7 +240,7 @@ async def admin(
         try:
             cur.execute(
                 '''INSERT OR IGNORE INTO `users`
-                (user_key, name, student_id, level, uuid)
+                (`user_key`, `name`, `student_id`, `level`, `uuid`)
                 VALUES (?, ?, ?, ?)''',
                 (query['key'], query['name'], query['sid'],
                  query['lvl'], uuid4())
