@@ -4,6 +4,7 @@ import yaml as y
 
 from dependencies import get_api_key, kakao_bot
 from fastapi import APIRouter, Depends
+from hashlib import new as hasher
 from random import sample
 from sqlite3 import IntegrityError
 from time import time
@@ -129,22 +130,29 @@ async def admin(
     REFRESH = tem.QReply('🌀 새로고침', 'block', '🌀 새로고침', bi)
 
     if bn == 'Eval':
-        if not await permission(user_key, 4):
+        if not await permission_admin(user_key, 2):
             return tem.simpleText(WEAK)
         try:
             res = eval(params['eval'])
         except BaseException as e:
             res = e
         return tem.simpleText(str(res)[:4010])
+    
+    elif bn == '해시화':
+        if not await permission_admin(user_key, 1):
+            return tem.simpleText(WEAK)
+        h = hasher(params['algorithm'])
+        h.update(params['text'].encode())
+        return tem.simpleText(h.hexdigest())
 
     elif bn == '사용자 키':
         return tem.simpleText(user_key)
 
-    elif bn == '공지 수정':
-        if not await permission(user_key, 3):
+    elif bn == '공지 사항 수정':
+        if not await permission_admin(user_key, 2):
             return tem.simpleText(WEAK)
         try:
-            cur.execute('UPDATE bot SET content=? WHERE field="notice"',
+            cur.execute("UPDATE `bot` SET content=%s WHERE field='notice'",
                         (params['text'],))
             res = '성공'
             con.commit()
@@ -153,8 +161,8 @@ async def admin(
         return tem.simpleText(f'📢 공지 수정에 {res}했어요.', [RETRY])
     
     elif bn == '사용자 등록':
-        TITLE = '👨🏻‍💼 사용자 등록'
-        if not await permission_admin(user_key, 2):
+        TITLE = '✅ 사용자 등록'
+        if not await permission_admin(user_key, 1):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
 
         try:
@@ -211,12 +219,13 @@ async def admin(
             u = cur.fetchone()
             list_items = [
                 tem.ListItem('사용자 키', u[0]), tem.ListItem('이름', u[1]),
-                tem.ListItem('학번', u[2]), tem.ListItem('권한 상태', u[3]),
+                tem.ListItem('학번', u[2]), tem.ListItem('권한 상태', str(u[3])),
                 tem.ListItem('전화번호', u[4])
             ]
             return tem.listCard(
-                '사용자 정보', list_items,
+                '👨🏻‍💼 사용자 정보', list_items,
                 [
+                    RETRY,
                     tem.QReply(
                         '제거', 'block',
                         '사용자 제거', '63b115fa2a784f093357cef2'
@@ -224,7 +233,7 @@ async def admin(
                     tem.QReply(
                         '권한 상태 변경', 'block',
                         '사용자 권한 상태 변경', '63b12e292a784f093357cf9b'
-                    ),
+                    )
                 ],
                 contexts=[tem.Context('user_selected', 1, {'query': params['query']})]
             )
@@ -232,8 +241,8 @@ async def admin(
             return tem.simpleText(f'{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
     
     if bn == '사용자 제거':
-        TITLE = '👨🏻‍💼 사용자 제거'
-        if not await permission_admin(user_key, 2):
+        TITLE = '🗑️ 사용자 제거'
+        if not await permission_admin(user_key, 1):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
         try:
             query: dict[str, str] = y.load(
@@ -262,12 +271,18 @@ async def admin(
         except:
             res = '실패'
         return tem.simpleText(
-            f'{TITLE}\n\n사용자 제거에 {res}했어요.', [RETRY]
+            f'{TITLE}\n\n사용자 제거에 {res}했어요.',
+            [
+                RETRY,
+                tem.QReply(
+                    '조회', 'block', '사용자 조회', '63b115302a784f093357cee8'
+                )
+            ]
         )
 
     elif bn == '사용자 권한 상태 변경':
-        TITLE = '👨🏻‍💼 사용자 권한 상태 변경'
-        if not await permission_admin(user_key, 2):
+        TITLE = '🔃 사용자 권한 상태 변경'
+        if not await permission_admin(user_key, 1):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
         try:
             query: dict[str, str] = y.load(
@@ -283,8 +298,7 @@ async def admin(
             })
         except:
             return tem.simpleText(
-                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.',
-                [RETRY]
+                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.', [RETRY]
             )
         try:
             cur.execute(
@@ -299,23 +313,12 @@ async def admin(
         except:
             res = '실패'
         return tem.simpleText(
-            f'{TITLE}\n\n사용자 권한 상태 변경에 {res}했어요.', [RETRY]
-        )
-    
-    elif bn == '관리자 목록':
-        TITLE = '👨🏻‍💼 관리자 목록(클래식)'
-        SEP = '\n----------\n> '
-        if not await permission(user_key, 2):
-            return tem.simpleText(WEAK)
-        cur.execute('SELECT * FROM users WHERE level>1')
-        l = cur.fetchall()
-        return tem.simpleText(
-            '\n'.join(
-                TITLE, SEP, SEP.join('\n> '.join(map(str, t)) for t in l), SEP
-            ),
+            f'{TITLE}\n\n사용자 권한 상태 변경에 {res}했어요.',
             [
-                REFRESH, tem.QReply('👨🏻‍💼 사용자 관리', 'block',
-                    	            '👨🏻‍💼 사용자 관리', '631b2af35a905f23599f6bea')
+                RETRY,
+                tem.QReply(
+                    '조회', 'block', '사용자 조회', '63b115302a784f093357cee8'
+                )
             ]
         )
 
