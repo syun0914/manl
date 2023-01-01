@@ -229,7 +229,7 @@ async def admin(
                 contexts=[tem.Context('user_selected', 1, {'query': params['query']})]
             )
         except:
-            return tem.simpleText('{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
+            return tem.simpleText(f'{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
     
     if bn == '사용자 제거':
         TITLE = '👨🏻‍💼 사용자 제거'
