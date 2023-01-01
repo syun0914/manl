@@ -30,7 +30,6 @@ async def skill(
         k_req: 카카오에서 받은 페이로드
         api_key: API 키
     '''
-
     user_req = k_req['userRequest']
     bot = k_req['bot']
     params = k_req['action']['params']
@@ -262,12 +261,26 @@ async def admin(
                 SELECT * FROM `users` WHERE
                 {" AND ".join(f"{k} LIKE '{v}'" for k, v in query.items())}
             ''')
-            list_items = ([
+            u = cur.fetchone()
+            list_items = [
                 tem.ListItem('사용자 키', u[0]), tem.ListItem('이름', u[1]),
-                tem.ListItem('학번', u[2]), tem.ListItem('등급·허가 상태', u[3]),
-                tem.ListItem('UUID', u[4])
-            ] for u in cur.fetchmany(5))
-            return tem.carousel('listCard', [tem.listCard('사용자 조회 결과', l) for l in list_items])
+                tem.ListItem('학번', u[2]), tem.ListItem('권한 상태', u[3]),
+                tem.ListItem('UUID', u[4]), tem.ListItem('전화번호', u[5])
+            ]
+            return tem.listCard(
+                '사용자 정보', list_items,
+                [
+                    tem.QReply(
+                        '제거', 'block',
+                        '사용자 제거', '63b115fa2a784f093357cef2'
+                    ),
+                    tem.QReply(
+                        '권한 상태 변경', 'block',
+                        '사용자 권한 상태 변경', '63b12e292a784f093357cf9b'
+                    ),
+                ],
+                contexts=[tem.Context('user_selected', 1, {'query': params['query']})]
+            )
         except:
             return tem.simpleText('{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
     

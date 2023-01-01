@@ -187,13 +187,13 @@ def data(contexts: list[Context] | None = None, **kwargs) -> dict:
     키워드 인자:
         kwargs: 데이터
     '''
-    return {
+    return del_empty({
         'version': VERSION,
         'data': del_empty(kwargs),
         'context': del_empty({
             'values': contexts and [del_empty(asdict(c)) for c in contexts]
         })
-    }
+    })
 
 
 def simpleImage(
@@ -230,7 +230,7 @@ def simpleImage(
         })
     }
     
-    return t_filter(a, 'simpleImage')
+    return t_filter(del_empty(a), 'simpleImage')
 
 
 def simpleText(
@@ -266,7 +266,7 @@ def simpleText(
             'values': contexts and [del_empty(asdict(c)) for c in contexts]
         })
     }
-    return t_filter(a, 'simpleText')
+    return t_filter(del_empty(a), 'simpleText')
 
 
 def listCard(
@@ -305,7 +305,7 @@ def listCard(
             'values': contexts and [del_empty(asdict(c)) for c in contexts]
         })
     }
-    return t_filter(a, 'listCard')
+    return t_filter(del_empty(a), 'listCard')
 
 
 def carousel(
@@ -340,7 +340,7 @@ def carousel(
             'values': contexts and [del_empty(asdict(c)) for c in contexts]
         })
     }
-    return t_filter(a, 'carousel')
+    return t_filter(del_empty(a), 'carousel')
 
 
 def basicCard(
@@ -382,4 +382,4 @@ def basicCard(
             'values': contexts and [del_empty(asdict(c)) for c in contexts]
         })
     }
-    return t_filter(a, 'basicCard')
+    return t_filter(del_empty(a), 'basicCard')
