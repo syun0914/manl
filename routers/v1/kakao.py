@@ -243,7 +243,7 @@ async def admin(
                 (`user_key`, `name`, `student_id`, `level`, `uuid`)
                 VALUES (?, ?, ?, ?)''',
                 (query['key'], query['name'], query['sid'],
-                 query['lvl'], uuid4())
+                 query['lvl'], str(uuid4()))
             )
             res = '성공'
             con.commit()
