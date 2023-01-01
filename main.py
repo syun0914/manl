@@ -1,7 +1,7 @@
 import pyotp
 
 from fastapi import FastAPI, Request
-from routers.v1 import kakao_v1
+from routers.v1 import kakao as kakao_v1
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse ,ORJSONResponse
