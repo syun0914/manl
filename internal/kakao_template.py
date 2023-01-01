@@ -12,8 +12,8 @@ class QReply:
     속성:
         label: 사용자에게 노출될 응답 표시
         action: 눌렀을 때 수행할 동작, 'block' 또는 'message'
-        messageText: action == 'message'일 경우 사용자의 발화로 내보냅니다.
-        blockId: action == 'message'일 경우 {blockId}인 블록을 호출합니다.
+        messageText: {action}이 'message'일 경우 사용자의 발화로 내보냅니다.
+        blockId: {action}이 'message'일 경우 {blockId}인 블록을 호출합니다.
         extra: 스킬 서버에 추가적으로 제공하는 정보
     '''
     label: str = ''
@@ -28,6 +28,7 @@ class Link:
     '''링크
 
     챗봇에서 링크로 들어갑니다.
+    보이는 우선 순위는 web > pc = mobile입니다.
 
     속성:
         web: 웹에서 보일 링크
@@ -49,10 +50,7 @@ class ListItem:
         title: 제목
         description: 설명
         imageUrl: 이미지 URL
-        link: 연결 링크, 보이는 우선 순위는 pc = mobile < web입니다.
-            pc: PC에서 보일 링크
-            mobile: 모바일에서 보일 링크
-            web: 웹에서 보일 링크
+        link: 링크
         action: 눌렀을 때 수행할 동작, 종류와 설명은 아래 [종류]와 같습니다.
             종류:
                 'block': {blockId}를 갖는 블록을 호출합니다.
