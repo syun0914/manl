@@ -1,7 +1,7 @@
 from aiohttp import ClientSession
-from datetime import datetime, timedelta
-from comcigan import AsyncSchool
 from bs4 import BeautifulSoup as BS
+from comcigan import AsyncSchool
+from datetime import timedelta, datetime
 from random import sample
 from re import compile, findall, finditer
 from sympy import expand, Symbol

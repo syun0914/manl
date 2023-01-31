@@ -15,7 +15,7 @@ async def get_api_key(
 ) -> str:
     '''API KEY 검증하기
 
-    API KEY가 SUPER_KEY와 일치하지 않는 경우, 401 Unauthrized를 반환합니다.
+    API KEY가 SUPER_KEY와 일치하지 않는 경우, 예외를 반환합니다.
     일치하는 경우, API KEY를 반환합니다.
     
     인자:

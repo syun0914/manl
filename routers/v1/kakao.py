@@ -1,4 +1,4 @@
-import internal.kakao_template as tem
+import kakao_template as tem
 import orjson as j
 import yaml as y
 
@@ -6,20 +6,19 @@ from dependencies import get_api_key, kakao_bot
 from fastapi import APIRouter, Depends
 from hashlib import new as hasher
 from random import sample
-from sqlalchemy import and_, delete, func, insert, or_, select, update
+from sqlalchemy import and_, delete, func, insert, select, update
 from time import time
 from urllib.parse import quote
-from uuid import uuid4
+from util import *
 
 from database.crud import (
     permission_user as perm_user,
     permission_admin as perm_admin
 )
-from database.models import User, Admin, Notice
+from database.models import Admin, Notice, NumberBaseball, User
 from database.session import get_db
 from fastapi.responses import ORJSONResponse
 from fastapi.security.api_key import APIKey
-from internal.util import *
 from sqlalchemy.orm import Session
 
 router = APIRouter(prefix='/api/v1')
@@ -33,11 +32,12 @@ async def skill(
 ):
     '''일반 백엔드 API
 
-    마늘의 일반 백엔드 API입니다.
+    마늘 Xllent의 백엔드 API입니다.
 
     인자:
         k_req: 카카오에서 받은 페이로드
         api_key: API 키
+        db: 데이터베이스 세션
     '''
     user_req = k_req['userRequest']
     bot = k_req['bot']
@@ -52,7 +52,8 @@ async def skill(
     if bn == '급식' or bn == '생일 급식':
         thumbnail = tem.Thumbnail(
             'https://rawcdn.githack.com/syun0914/manl_thumbnail/f19f16a42ec0b6a0ac512119d2b90a3c51d0674b/winter_2022/2022_winter_1_compressed.png',
-            tem.Link('http://112.186.146.81:4082/st'), True, 2560, 2560)
+            tem.Link('http://112.186.146.81:4082/st'), True, 2560, 2560
+        )
         if not await perm_user(db, user_key):
             return tem.basicCard(thumbnail, '사용 불가', WEAK)
         d = await meal(j.loads(params['date'])['date'], params['meal_time'])
@@ -64,7 +65,8 @@ async def skill(
     elif bn == '시간표':
         thumbnail = tem.Thumbnail(
             'https://rawcdn.githack.com/syun0914/manl_thumbnail/f19f16a42ec0b6a0ac512119d2b90a3c51d0674b/winter_2022/2022_winter_2_compressed.png',
-            tem.Link('http://112.186.146.81:4082/st'), True, 2560, 2560)
+            tem.Link('http://112.186.146.81:4082/st'), True, 2560, 2560
+        )
         if not await perm_user(db, user_key):
             return tem.basicCard(thumbnail, '사용 불가', WEAK)
         d = await timetable('3-1', params['day'])
@@ -123,7 +125,12 @@ async def admin(
 ):
     '''관리자 백엔드 API
 
-    마늘의 관리자 백엔드 API입니다.
+    Xllent Space의 백엔드 API입니다.
+    
+    인자:
+        k_req: 카카오에서 받은 페이로드
+        api_key: API 키
+        db: 데이터베이스 세션
     '''
     user_req = k_req['userRequest']
     bot = k_req['bot']
@@ -200,7 +207,7 @@ async def admin(
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
 
         try:
-            query: dict[str, str] = y.load(
+            query: dict = y.load(
                 stream=params['query'].replace(', ', '\n').replace(',', '\n'),
                 Loader=y.FullLoader
             )
@@ -229,7 +236,7 @@ async def admin(
         if not await perm_admin(db, user_key, 1):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
         try:
-            query: dict[str, str] = y.load(
+            query: dict = y.load(
                 stream=params['query'].replace(', ', '\n').replace(',', '\n'),
                 Loader=y.FullLoader
             )
@@ -269,17 +276,21 @@ async def admin(
                         '사용자 정보 수정', '63b12e292a784f093357cf9b'
                     )
                 ],
-                contexts=[tem.Context('user_selected', 1, {'query': params['query']})]
+                contexts=[
+                    tem.Context('user_selected', 1, {'query': params['query']})
+                ]
             )
         except:
-            return tem.simpleText(f'{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY])
+            return tem.simpleText(
+                f'{TITLE}\n\n사용자 조회에 실패했어요.', [RETRY]
+            )
     
     if bn == '사용자 제거':
         TITLE = '🗑️ 사용자 제거'
         if not await perm_admin(db, user_key, 1):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
         try:
-            query: dict[str, str] = y.load(
+            query: dict = y.load(
                 stream=params['query'].replace(', ', '\n').replace(',', '\n'),
                 Loader=y.FullLoader
             )
@@ -318,7 +329,7 @@ async def admin(
         if not await perm_admin(db, user_key, 1):
             return tem.simpleText(f'{TITLE}\n\n{WEAK}')
         try:
-            query: dict[str, str] = y.load(
+            query: dict = y.load(
                 stream=params['query'].replace(', ', '\n').replace(',', '\n'),
                 Loader=y.FullLoader
             )
@@ -328,25 +339,28 @@ async def admin(
                 'student_id': query.pop('sid', '%%'),
                 'phone': query.get('phone', '%%')
             }
-            new_query: dict[str, str] = y.load(
-                stream=params['new_query'].replace(', ', '\n').replace(',', '\n'),
+            new_query: dict = y.load(
+                stream=(
+                    params['new_query'].
+                    replace(', ', '\n').replace(',', '\n')
+                ),
                 Loader=y.FullLoader
             )
-            nq = {
+            nq = tem.del_empty({
                 'name': new_query.get('name'),
                 'student_id': new_query.get('sid'),
-                'level': new_query.get('lvl'),
+                'level': new_query.get('lvl') and int(nq['level']),
                 'phone': new_query.get('phone')
-            }
-            nq['level'] = nq.get('level') and int(nq['level'])
-            nq = tem.del_empty(nq)
+            })
         except TypeError:
             return tem.simpleText(
-                f'{TITLE}\n\nlvl을 자연수로 보냈는지 확인해주세요.', [RETRY]
+                f'{TITLE}\n\nlvl을 자연수로 보냈는지 확인해주세요.',
+                [RETRY]
             )
         except BaseException as e:
             return tem.simpleText(
-                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.', [RETRY]
+                f'{TITLE}\n\nYAML-Comma 형식으로 보냈는지 확인해주세요.',
+                [RETRY]
             )
         try:
             db.execute(
@@ -363,7 +377,9 @@ async def admin(
             f'{TITLE}\n\n사용자 정보 수정에 {res}했어요.',
             [
                 RETRY,
-                tem.QReply('조회', 'block', '사용자 조회', '63b115302a784f093357cee8')
+                tem.QReply(
+                    '조회', 'block', '사용자 조회', '63b115302a784f093357cee8'
+                )
             ]
         )
 
@@ -389,7 +405,9 @@ async def etc(
     REFRESH = tem.QReply('🌀 새로고침', 'block', '🌀 새로고침', bi)
     
     if bn == '도서관 책 검색':
-        return tem.simpleText('「도서관 책 검색」은 2022년 7월 22일에 서비스가 종료되었어요.')
+        return tem.simpleText(
+            '「도서관 책 검색」은 2022년 7월 22일에 서비스가 종료되었어요.'
+        )
 
     else:
         return tem.data(d='B#다4%^바*-N0+2T|타6!@8')
@@ -397,103 +415,109 @@ async def etc(
 
 @router.post('/game', response_class=ORJSONResponse)
 async def game(
-    k_req=Depends(kakao_bot), api_key: APIKey = Depends(get_api_key)
+    k_req: dict = Depends(kakao_bot),
+    api_key: APIKey = Depends(get_api_key),
+    db: Session = Depends(get_db)
 ):
     '''게임 백엔드 API
 
-    마늘의 게임 백엔드 API입니다.
+    마늘 Xllent의 게임 API입니다.
+    
+    인자:
+        k_req: 카카오에서 받은 페이로드
+        api_key: API 키
+        db: 데이터베이스 세션
     '''
     user_req = k_req['userRequest']
     bot = k_req['bot']
     params = k_req['action']['params']
     block = user_req['block']
     user_key = user_req['user']['properties']['plusfriendUserKey']
+    user_code = await get_user_code(db, user_key)
     bn, bi = block['name'], block['id']
     WEAK = '사용이 허가되지 않았어요.\n관리자에게 문의해주세요.'
     RETRY = tem.QReply('🌀 다시하기', 'block', '🌀 다시하기', bi)
-    REFRESH = tem.QReply('🌀 새로고침', 'block', '🌀 새로고침', bi)
+    CONTINUE = tem.QReply('🌀 이어하기', 'block', '🌀 이어하기', bi)
 
     if bn == '숫자야구':
         TITLE = '⚾️  숫자야구'
-        if not await permission(user_key):
-            return tem.simpleText('\n\n'.join((TITLE, WEAK)))
-        input_ = params['input']
-
-        if '시작' in input_:
-            try:
-                cur.execute(
-                	'INSERT INTO num_baseball VALUES (?, ?, 0, ?);',
-                	(user_key, ''.join(map(sample(range(9), 4))), time())
-            	)
-                message = '게임을 시작했어요. 숫자야구를 다시 실행해 숫자를 입력해주세요.'
-                con.commit()
-            except IntegrityError:
-                message = '이미 게임이 시작되었어요. 숫자야구를 다시 실행해 숫자를 입력해주세요.'
-            except:
-                message = '알 수 없는 오류가 발생했어요.'
-            return tem.simpleText('\n\n'.join((TITLE, message)), [RETRY])
-            
-        elif '도움말' in input_:
+        if not await permission(db, user_key):
+            return tem.simpleText(f'{TITLE}\n\n{WEAK}')
+        query = params['query']
+        
+        if '도움말' in query:
             return tem.simpleText(
                 f'{TITLE} 도움말\n\n'
-                '〈바로가기 버튼〉\n'
-                '게임 시작: 게임을 시작해요.\n'
+                '- 바로가기 버튼 -\n'
                 '게임 종료: 게임을 종료해요.\n'
                 '도움말: 이 도움말을 띄워요.\n\n'
-                '〈게임 정보〉\n'
+                '- 게임 정보 -\n'
                 '1. 숫자를 맞추는 게임이에요.\n'
-                '2. 횟수가 적을수록 좋지만 너무 신경쓰지는 마세요.\n'
-                '3. 중복되지 않는 0에서 9까지의 숫자 4자리를 입력해야 해요.\n'
-                "4. 숫자는 맞지만 위치가 틀렸을 때는 '볼(B)'이에요.\n"
-                "5. 숫자가 맞고, 위치도 맞았을 때는 '스트라이크(S)'예요.\n"
-                "6. 어떠한 숫자도 맞지 않았을 때는 '아웃(OUT)'이에요.",
+                '2. 횟수가 적을수록 좋지만 너무 신경쓰지는 마세요.\n' 
+                '3. 중복되지 않은 0에서 9까지의 숫자 4자리를 입력해야 해요.\n'
+                "4. 숫자는 맞지만 위치가 틀리면 '볼(B)'이에요.\n"
+                "5. 숫자가 맞고, 위치도 맞으면 '스트라이크(S)'예요.\n"
+                "6. 어떠한 숫자도 맞지 않으면 '아웃(OUT)'이에요.",
                 [RETRY]
             )
-
-        try:
-            cur.execute(
-                'SELECT * FROM num_baseball WHERE user_key=?;', (user_key,)
+        
+        stmt = (select(NumberBaseball)
+                .where(NumberBaseball.user_code == user_code))
+        ud = db.execute(stmt).first()
+        if not ud:
+            db.execute(
+                insert(NumberBaseball)
+                .values(user_code=user_code,
+                        answer=''.join(map(sample(range(9), 4))),
+                        count=0, datetime=func.now())
             )
-            userdata = cur.fetchall()[0]
-        except:
-            return tem.simpleText('\n\n'.join((TITLE, '알 수 없는 오류가 발생했어요.')), [RETRY])
+            db.commit()
+            ud = db.execute(stmt).first()[0]
+        else:
+            ud = ud[0]
 
-        if '종료' in input_:
-            try:
-                cur.execute(
-                    'DELETE FROM num_baseball WHERE user_key=?', (user_key,)
-                )
-            except:
-                return tem.simpleText('\n\n'.join((TITLE, '게임을 종료하지 못했어요.')), [RETRY])
-            else:
-                con.commit()
-                res = [('정답', userdata[1]), ('횟수', str(userdata[2]))]
+        if '종료' in query:
+            db.execute(
+                delete(NumberBaseball)
+                .where(NumberBaseball.user_code == user_code)
+            )
+            db.commit()
+            res = [
+                ('정답', ud.answer),
+                ('횟수', str(ud.count))
+            ]
             return tem.listCard(
                 TITLE, [tem.ListItem(*t) for t in res], [RETRY]
             )
-
-        elif len(set(input_)) != 4 or not input_.isdigit():
-            return tem.simpleText('\n\n'.join((TITLE, '올바르지 않은 입력값이에요.')), [RETRY])
+        
+        elif len(set(input_)) != 4 or not query.isdigit():
+            return tem.simpleText(
+                '\n\n'.join((TITLE, '올바르지 않은 입력값이에요.')), [RETRY]
+            )
 
         else:
-            bt = num_baseball_check(input_, userdata[1])
-            count = userdata[2] + 1
+            bt = num_baseball_check(query, ud.answer)
+            count = ud.count + 1
             msg = '성공' if bt == '4S 0B' else '실패'
             if msg == '성공':
-                cur.execute(
-                    'DELETE FROM num_baseball WHERE user_key=?', (user_key,)
+                db.execute(
+                    delete(NumberBaseball)
+                    .where(NumberBaseball.user_code == user_code)
                 )
             elif msg == '실패':
-                cur.execute(
-                    'UPDATE num_baseball SET count=? WHERE user_key=?',
-                    (count, user_key)
+                db.execute(
+                    update(NumberBaseball)
+                    .values(count=count)
+                    .where(NumberBaseball.user_code == user_code)
                 )
-            con.commit()
-            res = [('입력값', input_),
-                   ('결과', ', '.join(msg, count)),
-                   ('횟수', str(count))]
+            db.commit()
+            res = [
+                ('입력값', query),
+                ('결과', f'{msg}, {bt}'),
+                ('횟수', str(count))
+            ]
             return tem.listCard(
-                TITLE, [tem.ListItem(*t) for t in res], [RETRY]
+                TITLE, [tem.ListItem(*t) for t in res], [CONTINUE]
             )
 
     else:

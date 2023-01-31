@@ -1,11 +1,11 @@
 import pyotp
 
 from fastapi import FastAPI, Request
-from routers.v1 import kakao as kakao_v1
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse ,ORJSONResponse
 from fastapi.templating import Jinja2Templates
+from routers.v1 import kakao as kakao_v1
 
 app = FastAPI(title='Manl', description='마늘 Core', version='1.0')
 templates = Jinja2Templates('templates')

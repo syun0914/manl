@@ -1,9 +1,13 @@
 BOT_IDS = {
-    'test_kakao_bot_id'
+    'bot id'
 }
 
 DB_SETTING = {
-    'check_same_thread': False
+    'host': 'ip or address',
+    'port': 0,
+    'user': 'user name',
+    'password': 'password',
+    'database': 'database name'
 }
 
-SUPER_KEY = 'test_api_key'
+SUPER_KEY = 'super key'

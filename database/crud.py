@@ -17,10 +17,10 @@ async def permission_user(
         user_key: 사용자 키
         least_level: 최소 권한
     '''
-    level = db.execute(
+    user = db.execute(
         select(User.level).where(User.user_key == user_key)
-    ).first().level or 0
-    return level >= least_level
+    ).first()
+    return getattr(user, 'level', 0) >= least_level
 
 
 async def permission_admin(
@@ -36,7 +36,22 @@ async def permission_admin(
         user_key: 사용자 키
         least_level: 최소 권한
     '''
-    level = db.execute(
+    admin = db.execute(
         select(Admin.level).where(Admin.user_key == user_key)
-    ).first().level or 0
-    return level >= least_level
+    ).first()
+    return getattr(admin, 'level', 0) >= least_level
+
+
+def get_user_code(db: Session, user_key: str):
+    '''사용자 코드 얻기
+   
+    * 사용자 키가 데이터베이스에 미등록 상태라면 사용자 코드는 -1로 간주합니다.
+
+    인자:
+        db: 데이터베이스 세션
+        user_key: 사용자 키
+    '''
+    user = db.execute(
+        select(User.user_code).where(User.user_key == user_key)
+    ).first()
+    return getattr(user, 'user_code', -1)
