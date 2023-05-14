@@ -12,6 +12,7 @@ class User(Base):
     level: int = Column(Integer)
     phone: str = Column(Text)
     user_code: int = Column(Integer, primary_key=True, autoincrement=True)
+    score: int = Column(Integer)
 
 
 class Admin(Base):
@@ -37,10 +38,10 @@ class Notice(Base):
 class NumberBaseball(Base):
     __tablename__ = 'num_baseball'
     
-    num_baseball_code: int = Column(Integer, primary_key=True, autoincrement=True)
     user_code: int = Column(Integer, ForeignKey('users.user_code'))
     answer: str = Column(Text(4))
     count: int = Column(Integer)
     datetime: DateTime = Column(DateTime)
+    num_baseball_code: int = Column(Integer, primary_key=True, autoincrement=True)
     
     user = relationship('User')
