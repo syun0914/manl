@@ -1,13 +1,14 @@
 BOT_IDS = {
-    'bot id'
+    "Bot ID",
 }
 
-DB_SETTING = {
-    'host': 'ip or address',
-    'port': 0,
-    'user': 'user name',
-    'password': 'password',
-    'database': 'database name'
-}
+DB_URL = "SqlAlchemy Database URL"
 
-SUPER_KEY = 'super key'
+SUPER_KEY = "Super Key"
+
+MEAL_PARAMS = {
+    "ATPT_OFCDC_SC_CODE": "Office of Education Code",
+    "SD_SCHUL_CODE": "School Code",
+    "key": "API Key",
+    "type": "JSON",
+}
